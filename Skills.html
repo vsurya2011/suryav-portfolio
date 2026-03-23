@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skills | Surya V</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+
+        body {
+            background-color: #050505;
+            color: white;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0; left: 0; z-index: -1;
+            filter: blur(60px); opacity: 0.15;
+        }
+
+        /* --- NAVIGATION --- */
+        .nav-pill {
+            background: rgba(10, 10, 10, 0.6);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 8px 12px;
+            border-radius: 100px;
+        }
+
+        .nav-link {
+            padding: 8px 14px; border-radius: 100px;
+            font-size: 0.75rem; font-weight: 600;
+            color: #999; transition: 0.3s;
+            letter-spacing: 0.05em;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: white; background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* --- SKILL CARDS --- */
+        .skill-card {
+            background: #0d0d0d;
+            border-radius: 24px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            border: 1px solid rgba(255,255,255,0.03);
+            position: relative;
+            transition: all 0.4s ease;
+            cursor: pointer;
+        }
+
+        .skill-card:hover {
+            background: #121212;
+            transform: translateY(-5px);
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        .icon-box {
+            width: 70px; height: 70px;
+            background: #141414;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .icon-box img {
+            width: 35px; height: 35px;
+            object-fit: contain;
+        }
+
+        .skill-info {
+            position: absolute;
+            top: 15px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0;
+            transition: 0.3s;
+        }
+
+        .skill-card:hover .skill-info { opacity: 1; }
+
+        .progress-bg {
+            width: 100%; height: 8px;
+            background: #1a1a1a; border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill { height: 100%; border-radius: 10px; transition: width 1.5s ease; }
+
+        /* --- OTHER SKILLS SECTIONS --- */
+        .misc-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 20px;
+        }
+
+        /* --- TOOL LOOP (Full Color Icons) --- */
+        .logoloop-container {
+            width: 100%; overflow: hidden; position: relative; padding: 40px 0;
+        }
+        .logoloop-track {
+            display: flex; white-space: nowrap; width: max-content; gap: 50px;
+            align-items: center;
+        }
+        .tool-icon {
+            width: 50px; height: 50px;
+            object-fit: contain;
+            transition: transform 0.3s;
+        }
+        .tool-icon:hover { transform: scale(1.2); }
+
+        /* --- MOBILE MENU --- */
+        .mobile-toggle { background: white !important; color: black !important; }
+        #mobile-overlay {
+            clip-path: circle(0% at 100% 0%);
+            transition: clip-path 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+            background: rgba(0, 0, 0, 0.98);
+        }
+        #mobile-overlay.open { clip-path: circle(150% at 100% 0%); }
+    </style>
+</head>
+<body>
+
+    <div id="bg-canvas"></div>
+
+    <nav class="fixed top-8 left-1/2 -translate-x-1/2 z-50 hidden xl:block">
+        <div class="nav-pill flex gap-1">
+            <a href="home.html" class="nav-link">Home</a>
+            <a href="about-me.html" class="nav-link">About me</a>
+            <a href="#" class="nav-link active">Skills</a>
+            <a href="projects.html" class="nav-link">Projects</a>
+            <a href="internship.html" class="nav-link">Internship</a>
+            <a href="certificate.html" class="nav-link">Certificates</a>
+            <a href="contact.html" class="nav-link">Contact</a>
+        </div>
+    </nav>
+
+    <button onclick="toggleMenu()" class="fixed top-6 right-6 z-[100] p-4 rounded-2xl mobile-toggle xl:hidden">
+        <i data-lucide="menu" id="menu-icon"></i>
+    </button>
+
+    <div id="mobile-overlay" class="fixed inset-0 z-[90] flex flex-col items-center justify-center gap-6 xl:hidden">
+        <a href="home.html" class="text-2xl font-extrabold text-neutral-500">Home</a>
+        <a href="about-me.html" class="text-2xl font-extrabold text-neutral-500">About me</a>
+        <a href="#" class="text-2xl font-extrabold text-white">Skills</a>
+        <a href="projects.html" class="text-2xl font-extrabold text-neutral-500">Projects</a>
+        <a href="internship.html" class="text-2xl font-extrabold text-neutral-500">Internship</a>
+        <a href="certificate.html" class="text-2xl font-extrabold text-neutral-500">Certificates</a>
+        <a href="contact.html" class="text-2xl font-extrabold text-neutral-500">Contact</a>
+    </div>
+
+    <main class="container mx-auto px-6 pt-32 pb-20">
+        <div class="mb-14">
+            <h1 class="text-4xl md:text-6xl font-black tracking-tighter uppercase mb-4">Core Skills</h1>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-20">
+            <div class="skill-card">
+                <span class="skill-info">HTML 90%</span>
+                <div class="icon-box"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg" alt="HTML"></div>
+                <div class="progress-bg"><div class="progress-fill bg-orange-500" style="width: 90%;"></div></div>
+            </div>
+
+            <div class="skill-card">
+                <span class="skill-info">CSS 85%</span>
+                <div class="icon-box"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg" alt="CSS"></div>
+                <div class="progress-bg"><div class="progress-fill bg-blue-500" style="width: 85%;"></div></div>
+            </div>
+
+            <div class="skill-card">
+                <span class="skill-info">JavaScript 80%</span>
+                <div class="icon-box"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" alt="JS"></div>
+                <div class="progress-bg"><div class="progress-fill bg-yellow-500" style="width: 80%;"></div></div>
+            </div>
+
+            <div class="skill-card">
+                <span class="skill-info">Python 85%</span>
+                <div class="icon-box"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python"></div>
+                <div class="progress-bg"><div class="progress-fill bg-blue-400" style="width: 85%;"></div></div>
+            </div>
+
+            <div class="skill-card">
+                <span class="skill-info">C / C++ 70%</span>
+                <div class="icon-box"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg" alt="C++"></div>
+                <div class="progress-bg"><div class="progress-fill bg-indigo-600" style="width: 80%;"></div></div>
+            </div>
+
+            <div class="skill-card">
+                <span class="skill-info">MySQL 80%</span>
+                <div class="icon-box"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg" alt="MySQL"></div>
+                <div class="progress-bg"><div class="progress-fill bg-blue-500" style="width: 80%;"></div></div>
+            </div>
+
+            <div class="skill-card">
+                <span class="skill-info">PostgreSQL 75%</span>
+                <div class="icon-box"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg" alt="Postgres"></div>
+                <div class="progress-bg"><div class="progress-fill bg-indigo-400" style="width: 75%;"></div></div>
+            </div>
+
+            <div class="skill-card">
+                <span class="skill-info">Java 70%</span>
+                <div class="icon-box"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg" alt="Java"></div>
+                <div class="progress-bg"><div class="progress-fill bg-red-500" style="width: 70%;"></div></div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
+            <div class="misc-card">
+                <h3 class="text-xs font-black uppercase tracking-[0.3em] mb-6 opacity-40">Professional & Technical</h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center bg-white/5 p-4 rounded-xl">
+                        <span class="font-bold text-sm">App & Web Development</span>
+                        <i data-lucide="code-2" class="w-4 h-4 text-cyan-400"></i>
+                    </div>
+                    <div class="flex justify-between items-center bg-white/5 p-4 rounded-xl">
+                        <span class="font-bold text-sm">Cybersecurity & Mobile Security</span>
+                        <i data-lucide="shield-check" class="w-4 h-4 text-green-400"></i>
+                    </div>
+                    <div class="flex justify-between items-center bg-white/5 p-4 rounded-xl">
+                        <span class="font-bold text-sm">Artificial Intelligence</span>
+                        <i data-lucide="cpu" class="w-4 h-4 text-purple-400"></i>
+                    </div>
+                    <div class="flex justify-between items-center bg-white/5 p-4 rounded-xl">
+                        <span class="font-bold text-sm">Project Management</span>
+                        <i data-lucide="briefcase" class="w-4 h-4 text-blue-400"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="misc-card">
+                <h3 class="text-xs font-black uppercase tracking-[0.3em] mb-6 opacity-40">Hardware Skills</h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center bg-white/5 p-4 rounded-xl">
+                        <span class="font-bold text-sm">Robotics & Automation</span>
+                        <i data-lucide="bot" class="w-4 h-4 text-orange-400"></i>
+                    </div>
+                    <div class="flex justify-between items-center bg-white/5 p-4 rounded-xl">
+                        <span class="font-bold text-sm">Embedded Systems</span>
+                        <i data-lucide="microchip" class="w-4 h-4 text-red-400"></i>
+                    </div>
+                    <div class="flex justify-between items-center bg-white/5 p-4 rounded-xl">
+                        <span class="font-bold text-sm">Circuit Design & PCB</span>
+                        <i data-lucide="layers" class="w-4 h-4 text-yellow-400"></i>
+                    </div>
+                    <div class="flex justify-between items-center bg-white/5 p-4 rounded-xl">
+                        <span class="font-bold text-sm">IoT Integration</span>
+                        <i data-lucide="wifi" class="w-4 h-4 text-blue-300"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="misc-card">
+                <h3 class="text-xs font-black uppercase tracking-[0.3em] mb-6 opacity-40">Soft Skills</h3>
+                <div class="flex flex-wrap gap-3">
+                    <span class="px-5 py-3 rounded-full bg-white/5 border border-white/10 text-sm font-bold">Communication</span>
+                    <span class="px-5 py-3 rounded-full bg-white/5 border border-white/10 text-sm font-bold">Teamwork</span>
+                    <span class="px-5 py-3 rounded-full bg-white/5 border border-white/10 text-sm font-bold">Problem Solving</span>
+                    <span class="px-5 py-3 rounded-full bg-white/5 border border-white/10 text-sm font-bold">Adaptability</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="border-t border-white/5 pt-12">
+            <span class="text-xs font-black opacity-30 uppercase tracking-[0.4em] block text-center mb-8">Development Toolkit</span>
+            <div class="logoloop-container">
+                <div class="logoloop-track" id="tool-track">
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        function toggleMenu() {
+            const overlay = document.getElementById('mobile-overlay');
+            const icon = document.getElementById('menu-icon');
+            const isOpen = overlay.classList.toggle('open');
+            icon.setAttribute('data-lucide', isOpen ? 'x' : 'menu');
+            lucide.createIcons();
+        }
+
+        // --- TOOLS LIST (Color Icons) ---
+        const toolIcons = [
+            "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg",
+            "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg",
+            "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vscode/vscode-original.svg",
+            "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg",
+            "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg",
+            "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/intellij/intellij-original.svg",
+            "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/arduino/arduino-original.svg",
+            "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/spring/spring-original.svg",
+            "https://raw.githubusercontent.com/devicons/devicon/master/icons/react/react-original.svg", 
+        ];
+
+        const track = document.getElementById('tool-track');
+
+        function initToolLoop() {
+            const content = toolIcons.map(src => `<img src="${src}" class="tool-icon" />`).join('') + `<i data-lucide="file-text" class="w-10 h-10 text-neutral-400"></i>`;
+            track.innerHTML = content + content + content;
+            lucide.createIcons();
+
+            let offset = 0;
+            const speed = 1.0; 
+            function animate() {
+                offset -= speed;
+                if (Math.abs(offset) >= track.scrollWidth / 3) offset = 0;
+                track.style.transform = `translateX(${offset}px)`;
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+        initToolLoop();
+
+        // --- BACKGROUND SHADER ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.Camera();
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('bg-canvas').appendChild(renderer.domElement);
+
+        const material = new THREE.ShaderMaterial({
+            uniforms: { iTime: { value: 0 }, iResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) } },
+            vertexShader: `void main() { gl_Position = vec4(position, 1.0); }`,
+            fragmentShader: `
+                precision highp float;
+                uniform float iTime;
+                uniform vec2 iResolution;
+                void main() {
+                    vec2 uv = gl_FragCoord.xy / iResolution.xy;
+                    vec3 col = 0.5 + 0.5 * cos(iTime + uv.xyx + vec3(0,2,4));
+                    gl_FragColor = vec4(col * 0.04, 1.0);
+                }
+            `
+        });
+        scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material));
+        function animateShader(time) {
+            material.uniforms.iTime.value = time * 0.0004;
+            renderer.render(scene, camera);
+            requestAnimationFrame(animateShader);
+        }
+        animateShader();
+    </script>
+</body>
+</html>

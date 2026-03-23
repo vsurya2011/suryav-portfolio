@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surya V | Projects</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Inter:wght@300;400;600;800&display=swap');
+
+        body {
+            background-color: #050505;
+            color: white;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* --- BACKGROUND & EFFECTS --- */
+        #splash-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .gradient-text {
+            background: linear-gradient(to right, #ffffff, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* --- NAVIGATION --- */
+        .nav-pill {
+            background: rgba(10, 10, 10, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            border-radius: 100px;
+        }
+
+        .nav-link {
+            padding: 8px 20px; border-radius: 100px;
+            font-size: 0.75rem; font-weight: 600;
+            color: #777; transition: 0.3s;
+            letter-spacing: 0.05em;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: white; background: rgba(255, 255, 255, 0.08);
+        }
+
+        #mobile-overlay {
+            clip-path: circle(0% at 100% 0%);
+            transition: clip-path 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+            background: rgba(0, 0, 0, 0.98);
+        }
+        #mobile-overlay.open { clip-path: circle(150% at 100% 0%); }
+
+        /* --- LIGHTNING CARDS --- */
+        .lightning-card {
+            background: rgba(17, 17, 17, 0.4);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .lightning-card:hover {
+            border-color: rgba(168, 85, 247, 0.4);
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 40px rgba(168, 85, 247, 0.15);
+        }
+
+        .github-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: #2563eb;
+            color: white;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: 0.3s;
+        }
+
+        .lightning-card:hover .github-link {
+            background: #a855f7;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="splash-canvas"></canvas>
+
+    <nav class="fixed top-8 left-1/2 -translate-x-1/2 z-50 hidden xl:block">
+        <div class="nav-pill flex gap-1">
+            <a href="home.html" class="nav-link">Home</a>
+            <a href="about-me.html" class="nav-link">About me</a>
+            <a href="Skills.html" class="nav-link">Skills</a>
+            <a href="#" class="nav-link active">Projects</a>
+            <a href="internship.html" class="nav-link">Internship</a>
+            <a href="certificate.html" class="nav-link">Certificates</a>
+            <a href="contact.html" class="nav-link">Contact</a>
+        </div>
+    </nav>
+
+    <button onclick="toggleMenu()" class="fixed top-6 right-6 z-[100] p-4 rounded-2xl bg-white text-black xl:hidden">
+        <i data-lucide="menu" id="menu-icon"></i>
+    </button>
+
+    <div id="mobile-overlay" class="fixed inset-0 z-[90] flex flex-col items-center justify-center gap-6 xl:hidden">
+        <a href="home.html" class="text-2xl font-extrabold text-neutral-500">Home</a>
+        <a href="about-me.html" class="text-2xl font-extrabold text-neutral-500">About me</a>
+        <a href="Skills.html" class="text-2xl font-extrabold text-neutral-500">Skills</a>
+        <a href="#" class="text-2xl font-extrabold text-white">Projects</a>
+        <a href="internship.html" class="text-2xl font-extrabold text-neutral-500">Internship</a>
+        <a href="certificate.html" class="text-2xl font-extrabold text-neutral-500">Certificates</a>
+        <a href="contact.html" class="text-2xl font-extrabold text-neutral-500">Contact</a>
+    </div>
+
+    <main class="relative z-10 max-w-7xl mx-auto px-6 py-24 md:py-32">
+        <div class="mb-16 text-center md:text-left">
+            <h2 class="text-5xl md:text-8xl font-black mb-6 tracking-tight leading-none">
+                SELECTED <br />
+                <span class="gradient-text">PROJECTS.</span>
+            </h2>
+            <p class="text-gray-400 max-w-xl text-lg mx-auto md:mx-0">
+                A showcase of my work in cybersecurity, full-stack development, and database automation.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            
+            <div class="lightning-card p-8 group">
+                <div>
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="p-4 bg-purple-500/10 rounded-2xl text-purple-400">
+                            <i data-lucide="shield-check" class="w-8 h-8"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-extrabold mb-2">Web Scan Pro</h3>
+                    <p class="text-purple-400 text-xs font-mono mb-6 uppercase tracking-widest">Python | Web Security</p>
+                    <ul class="text-gray-400 text-sm space-y-3 mb-8">
+                        <li class="flex gap-2"><span>▹</span> Automated web vulnerability scanner.</li>
+                        <li class="flex gap-2"><span>▹</span> Detected common vulnerabilities & insights.</li>
+                        <li class="flex gap-2"><span>▹</span> Structured reporting system for analysis.</li>
+                    </ul>
+                </div>
+                <a href="https://github.com/vsurya2011/Web_Scanpro" class="github-link">
+                    View Code <i data-lucide="github" class="w-4 h-4"></i>
+                </a>
+            </div>
+
+            <div class="lightning-card p-8 group">
+                <div>
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="p-4 bg-blue-500/10 rounded-2xl text-blue-400">
+                            <i data-lucide="database" class="w-8 h-8"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-extrabold mb-2">DB Analytics & Automation</h3>
+                    <p class="text-blue-400 text-xs font-mono mb-6 uppercase tracking-widest">PostgreSQL | Python</p>
+                    <ul class="text-gray-400 text-sm space-y-3 mb-8">
+                        <li class="flex gap-2"><span>▹</span> Dashboard-based insights using query analytics.</li>
+                        <li class="flex gap-2"><span>▹</span> Integrated SMTP automation for daily reports.</li>
+                        <li class="flex gap-2"><span>▹</span> Optimized database activity tracking.</li>
+                    </ul>
+                </div>
+                <a href="https://github.com/vsurya2011/python-automation" class="github-link">
+                    View Code <i data-lucide="github" class="w-4 h-4"></i>
+                </a>
+            </div>
+
+            <div class="lightning-card p-8 group">
+                <div>
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="p-4 bg-green-500/10 rounded-2xl text-green-400">
+                            <i data-lucide="message-square" class="w-8 h-8"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-extrabold mb-2">Intelligent Chatbot (Athena)</h3>
+                    <p class="text-green-400 text-xs font-mono mb-6 uppercase tracking-widest">Java | REST APIs</p>
+                    <ul class="text-gray-400 text-sm space-y-3 mb-8">
+                        <li class="flex gap-2"><span>▹</span> API-integrated chatbot using Python backend.</li>
+                        <li class="flex gap-2"><span>▹</span> External REST APIs for dynamic responses.</li>
+                        <li class="flex gap-2"><span>▹</span> Intelligent conversation flow management.</li>
+                    </ul>
+                </div>
+                <a href="https://github.com/vsurya2011/Athena" class="github-link">
+                    View Code <i data-lucide="github" class="w-4 h-4"></i>
+                </a>
+            </div>
+
+            <div class="lightning-card p-8 group">
+                <div>
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="p-4 bg-red-500/10 rounded-2xl text-red-400">
+                            <i data-lucide="credit-card" class="w-8 h-8"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-extrabold mb-2">AI Fraud Detection</h3>
+                    <p class="text-red-400 text-xs font-mono mb-6 uppercase tracking-widest">Python | Scikit-learn</p>
+                    <ul class="text-gray-400 text-sm space-y-3 mb-8">
+                        <li class="flex gap-2"><span>▹</span> Random Forest classifier with 96% accuracy.</li>
+                        <li class="flex gap-2"><span>▹</span> Advanced feature engineering on financial data.</li>
+                        <li class="flex gap-2"><span>▹</span> Scalable data preprocessing pipeline.</li>
+                    </ul>
+                </div>
+                <a href="https://github.com/vsurya2011/Ai-creditcard-fraud-detection_phase_3" class="github-link">
+                    View Code <i data-lucide="github" class="w-4 h-4"></i>
+                </a>
+            </div>
+
+            <div class="lightning-card p-8 group">
+                <div>
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="p-4 bg-orange-500/10 rounded-2xl text-orange-400">
+                            <i data-lucide="users" class="w-8 h-8"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-extrabold mb-2">SmartContact System</h3>
+                    <p class="text-orange-400 text-xs font-mono mb-6 uppercase tracking-widest">Java | JDBC | PostgreSQL</p>
+                    <ul class="text-gray-400 text-sm space-y-3 mb-8">
+                        <li class="flex gap-2"><span>▹</span> Full CRUD operations with JDBC integration.</li>
+                        <li class="flex gap-2"><span>▹</span> Relational database schema for optimized storage.</li>
+                        <li class="flex gap-2"><span>▹</span> Secure user authentication and data management.</li>
+                    </ul>
+                </div>
+                <a href="https://github.com/vsurya2011/projects/tree/main/Login" class="github-link">
+                    View Code <i data-lucide="github" class="w-4 h-4"></i>
+                </a>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="relative z-10 py-16 text-center border-t border-white/5 mt-10">
+        <p class="text-gray-600 text-xs tracking-widest uppercase font-bold">Built for Impact • Surya V. &copy; 2026</p>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        function toggleMenu() {
+            const overlay = document.getElementById('mobile-overlay');
+            const icon = document.getElementById('menu-icon');
+            overlay.classList.toggle('open');
+            const isOpen = overlay.classList.contains('open');
+            icon.setAttribute('data-lucide', isOpen ? 'x' : 'menu');
+            lucide.createIcons();
+        }
+
+        const canvas = document.getElementById('splash-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = Math.random() * 2 - 1;
+                this.speedY = Math.random() * 2 - 1;
+                this.color = `rgba(168, 85, 247, ${Math.random() * 0.4})`;
+                this.life = 1;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.life -= 0.015;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        window.addEventListener('mousemove', (e) => {
+            for (let i = 0; i < 3; i++) {
+                particles.push(new Particle(e.clientX, e.clientY));
+            }
+        });
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                if (particles[i].life <= 0) {
+                    particles.splice(i, 1);
+                    i--;
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+</body>
+</html>

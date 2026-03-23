@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact | Surya V</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+
+        body {
+            background-color: #000;
+            color: white;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        #magic-rings-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* --- NAVIGATION --- */
+        .nav-pill {
+            background: rgba(10, 10, 10, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            border-radius: 100px;
+        }
+
+        .nav-link {
+            padding: 8px 20px; border-radius: 100px;
+            font-size: 0.75rem; font-weight: 600;
+            color: #777; transition: 0.3s;
+            letter-spacing: 0.05em;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: white; background: rgba(255, 255, 255, 0.08);
+        }
+
+        /* --- LAYOUT --- */
+        .contact-section {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 100px 24px;
+        }
+
+        /* --- MODERN GRID --- */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+            gap: 20px;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        @media (min-width: 768px) {
+            .contact-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (min-width: 1024px) {
+            .contact-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        /* --- INTERACTIVE CARDS --- */
+        .contact-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            text-align: center;
+            transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            overflow: hidden;
+            min-height: 320px;
+        }
+
+        .contact-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(66, 252, 255, 0.3);
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        .contact-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(66, 252, 255, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: 0.5s;
+        }
+
+        .contact-card:hover::after { opacity: 1; }
+
+        .brand-icon-large {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 24px;
+            object-fit: contain;
+            transition: 0.5s;
+        }
+
+        .contact-card:hover .brand-icon-large {
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 15px rgba(255,255,255,0.3));
+        }
+
+        /* Specific fix for GitHub icon visibility */
+        .github-visible {
+            filter: invert(1) brightness(1.5);
+        }
+
+        .card-btn {
+            background: #2563eb;
+            color: white;
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+
+        .contact-card:hover .card-btn {
+            background: #3b82f6;
+            box-shadow: 0 0 20px rgba(37, 99, 235, 0.4);
+        }
+
+        #mobile-overlay {
+            clip-path: circle(0% at 100% 0%);
+            transition: clip-path 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+            background: rgba(0, 0, 0, 0.98);
+        }
+        #mobile-overlay.open { clip-path: circle(150% at 100% 0%); }
+    </style>
+</head>
+<body>
+
+    <div id="magic-rings-canvas"></div>
+
+    <nav class="fixed top-8 left-1/2 -translate-x-1/2 z-50 hidden xl:block">
+        <div class="nav-pill flex gap-1">
+            <a href="home.html" class="nav-link">Home</a>
+            <a href="about-me.html" class="nav-link">About me</a>
+            <a href="Skills.html" class="nav-link">Skills</a>
+            <a href="projects.html" class="nav-link">Projects</a>
+            <a href="internship.html" class="nav-link">Internship</a>
+            <a href="certificate.html" class="nav-link">Certificates</a>
+            <a href="#" class="nav-link active">Contact</a>
+        </div>
+    </nav>
+
+    <button onclick="toggleMenu()" class="fixed top-6 right-6 z-[100] p-4 rounded-2xl bg-white text-black xl:hidden">
+        <i data-lucide="menu" id="menu-icon"></i>
+    </button>
+
+    <div id="mobile-overlay" class="fixed inset-0 z-[90] flex flex-col items-center justify-center gap-6 xl:hidden">
+        <a href="home.html" class="text-2xl font-extrabold text-neutral-500">Home</a>
+        <a href="about-me.html" class="text-2xl font-extrabold text-neutral-500">About me</a>
+        <a href="Skills.html" class="text-2xl font-extrabold text-neutral-500">Skills</a>
+        <a href="projects.html" class="text-2xl font-extrabold text-neutral-500">Projects</a>
+        <a href="internship.html" class="text-2xl font-extrabold text-neutral-500">Internship</a>
+        <a href="certificate.html" class="text-2xl font-extrabold text-neutral-500">Certificates</a>
+        <a href="#" class="text-2xl font-extrabold text-white">Contact</a>
+    </div>
+
+    <main class="contact-section">
+        <div class="text-center mb-16">
+            <h1 class="text-6xl md:text-6xl font-black tracking-tighter uppercase leading-none">Get In Touch</h1>
+            <p class="mt-4 text-white/40 font-bold uppercase tracking-[0.4em]">Let's collaborate on something big</p>
+        </div>
+
+        <div class="contact-grid">
+            <a href="mailto:krishnasurya2011@gamil.com" class="contact-card">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Gmail_icon_%282020%29.svg" class="brand-icon-large" alt="Gmail">
+                <div>
+                    <p class="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">Send Mail</p>
+                    <p class="text-xs font-bold break-all">krishnasurya2011@gamil.com</p>
+                </div>
+                <div class="card-btn">CLICK THIS! <i data-lucide="arrow-up-right" class="w-3"></i></div>
+            </a>
+
+            <a href="https://wa.me/918270928551" target="_blank" class="contact-card">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="brand-icon-large" alt="WhatsApp">
+                <div>
+                    <p class="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">WhatsApp</p>
+                    <p class="text-xs font-bold">+91 8270928551</p>
+                </div>
+                <div class="card-btn">CLICK THIS! <i data-lucide="arrow-up-right" class="w-3"></i></div>
+            </a>
+
+            <a href="https://www.linkedin.com/in/surya-v-5b1305309" target="_blank" class="contact-card">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/8/81/LinkedIn_icon.svg" class="brand-icon-large" alt="LinkedIn">
+                <div>
+                    <p class="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">LinkedIn</p>
+                    <p class="text-xs font-bold">Surya V</p>
+                </div>
+                <div class="card-btn">CLICK THIS! <i data-lucide="arrow-up-right" class="w-3"></i></div>
+            </a>
+
+            <a href="https://github.com/vsurya2011" target="_blank" class="contact-card">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" class="brand-icon-large github-visible" alt="GitHub">
+                <div>
+                    <p class="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">GitHub</p>
+                    <p class="text-xs font-bold">vsurya2011</p>
+                </div>
+                <div class="card-btn">CLICK THIS! <i data-lucide="arrow-up-right" class="w-3"></i></div>
+            </a>
+
+            <a href="tel:+919345751429" class="contact-card lg:col-span-4 lg:min-height-0 flex-row lg:py-10 justify-center gap-10">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center">
+                        <i data-lucide="phone" class="text-white"></i>
+                    </div>
+                    <div class="text-left">
+                        <p class="text-[10px] font-bold text-white/40 uppercase tracking-widest">Call Me Direct</p>
+                        <p class="text-lg font-black">+91 9345751429</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <footer class="mt-20 opacity-40 text-[10px] font-bold tracking-[0.5em] uppercase">
+            Surya V &copy; 2026
+        </footer>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        function toggleMenu() {
+            const overlay = document.getElementById('mobile-overlay');
+            const icon = document.getElementById('menu-icon');
+            const isOpen = overlay.classList.toggle('open');
+            icon.setAttribute('data-lucide', isOpen ? 'x' : 'menu');
+            lucide.createIcons();
+        }
+
+        // --- SHADER ANIMATION ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.getElementById('magic-rings-canvas').appendChild(renderer.domElement);
+
+        const uniforms = {
+            uTime: { value: 0 },
+            uResolution: { value: new THREE.Vector2() },
+            uMouse: { value: new THREE.Vector2() },
+            uColor: { value: new THREE.Color('#fc42ff') },
+            uColorTwo: { value: new THREE.Color('#42fcff') }
+        };
+
+        const material = new THREE.ShaderMaterial({
+            vertexShader: `void main() { gl_Position = vec4(position, 1.0); }`,
+            fragmentShader: `
+                precision highp float;
+                uniform float uTime;
+                uniform vec2 uResolution, uMouse;
+                uniform vec3 uColor, uColorTwo;
+                
+                void main() {
+                    vec2 p = (gl_FragCoord.xy - 0.5 * uResolution.xy) / min(uResolution.y, uResolution.x);
+                    p -= uMouse * 0.05;
+                    vec3 color = vec3(0.0);
+                    for(float i=0.0; i<6.0; i++) {
+                        float t = uTime * 0.3 + i * 0.8;
+                        float r = mod(t, 2.8) * 0.45;
+                        float d = abs(length(p) - r);
+                        float ringVal = smoothstep(0.002, 0.0, d);
+                        color += mix(uColor, uColorTwo, i/6.0) * ringVal * smoothstep(1.0, 0.0, r);
+                    }
+                    gl_FragColor = vec4(color, length(color) * 0.6);
+                }
+            `,
+            uniforms,
+            transparent: true
+        });
+
+        scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material));
+
+        let mx = 0, my = 0;
+        window.addEventListener('mousemove', (e) => {
+            mx = (e.clientX / window.innerWidth) - 0.5;
+            my = -((e.clientY / window.innerHeight) - 0.5);
+        });
+
+        function resize() {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            uniforms.uResolution.value.set(window.innerWidth, window.innerHeight);
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        function animate(t) {
+            uniforms.uTime.value = t * 0.001;
+            uniforms.uMouse.value.x += (mx - uniforms.uMouse.value.x) * 0.05;
+            uniforms.uMouse.value.y += (my - uniforms.uMouse.value.y) * 0.05;
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+        animate(0);
+    </script>
+</body>
+</html>

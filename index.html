@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SV Portfolio | Interactive</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, sans-serif;
+        }
+
+        body {
+            background: #000;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            color: white;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            mix-blend-mode: screen;
+        }
+
+        .welcome-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 4rem 3rem;
+            border-radius: 40px;
+            text-align: center;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
+            max-width: 500px;
+            width: 90%;
+            z-index: 10;
+            animation: cardEntrance 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes cardEntrance {
+            from { opacity: 0; transform: scale(0.9) translateY(40px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .logo-img {
+            width: 130px;
+            height: 130px;
+            margin-bottom: 1.5rem;
+            filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.4));
+            transition: width 0.3s ease;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.2rem;
+            letter-spacing: -1px;
+            font-weight: 800;
+        }
+
+        .name-highlight {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 2.8rem;
+            color: #d4af37; 
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .typing-container {
+            font-size: 1.1rem;
+            color: #aaa;
+            margin-bottom: 2.5rem;
+            min-height: 24px;
+            line-height: 1.4;
+        }
+
+        /* Cursor Styling */
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            background-color: #d4af37;
+            margin-left: 2px;
+            animation: blink 0.7s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .btn {
+            padding: 16px 45px;
+            background: #fff;
+            color: #000;
+            text-decoration: none;
+            border-radius: 100px;
+            font-weight: 600;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.3);
+        }
+
+        @media (max-width: 600px) {
+            .welcome-card {
+                padding: 2.5rem 1.5rem;
+                border-radius: 30px;
+            }
+            .logo-img { width: 90px; height: 90px; }
+            h1 { font-size: 1.4rem; }
+            .name-highlight { font-size: 2.4rem; margin-bottom: 0.8rem; }
+            .typing-container { font-size: 0.95rem; margin-bottom: 2rem; }
+            .btn { padding: 14px 35px; font-size: 0.9rem; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="bg-canvas"></div>
+
+    <div class="welcome-card">
+        <img src="logo.png" alt="SV Logo" class="logo-img">
+        <h1>Hello !!!</h1>
+        <div class="name-highlight">I'm SURYA V</div>
+        <div class="typing-container">
+            <span id="typewriter"></span><span class="cursor">|</span>
+        </div>
+        <a href="home.html" class="btn">View</a>
+    </div>
+
+    <script id="vertexShader" type="x-shader/x-vertex">
+        precision highp float;
+        void main() {
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    </script>
+
+    <script id="fragmentShader" type="x-shader/x-fragment">
+        precision highp float;
+        uniform float iTime;
+        uniform vec3 iResolution;
+        uniform float animationSpeed;
+        uniform bool enableMiddle;
+        uniform int middleLineCount;
+        uniform float middleLineDistance;
+        uniform vec3 middleWavePosition;
+        uniform vec2 iMouse;
+        uniform bool interactive;
+        uniform float bendRadius;
+        uniform float bendStrength;
+        uniform float bendInfluence;
+        uniform bool parallax;
+        uniform vec2 parallaxOffset;
+        uniform vec3 lineGradient[8];
+        uniform int lineGradientCount;
+
+        mat2 rotate(float r) {
+            return mat2(cos(r), sin(r), -sin(r), cos(r));
+        }
+
+        vec3 getLineColor(float t) {
+            if (lineGradientCount <= 0) return vec3(0.5);
+            float clampedT = clamp(t, 0.0, 0.9999);
+            float scaled = clampedT * float(lineGradientCount - 1);
+            int idx = int(floor(scaled));
+            float f = fract(scaled);
+            vec3 c1 = lineGradient[idx];
+            vec3 c2 = lineGradient[min(idx + 1, lineGradientCount - 1)];
+            return mix(c1, c2, f) * 0.5;
+        }
+
+        float wave(vec2 uv, float offset, vec2 screenUv, vec2 mouseUv, bool shouldBend) {
+            float time = iTime * animationSpeed;
+            float y = sin(uv.x + offset + time * 0.1) * (sin(offset + time * 0.2) * 0.3);
+            if (shouldBend) {
+                vec2 d = screenUv - mouseUv;
+                float influence = exp(-dot(d, d) * bendRadius);
+                y += (mouseUv.y - screenUv.y) * influence * bendStrength * bendInfluence;
+            }
+            return 0.0175 / max(abs(uv.y - y) + 0.01, 1e-3) + 0.01;
+        }
+
+        void main() {
+            vec2 baseUv = (2.0 * gl_FragCoord.xy - iResolution.xy) / iResolution.y;
+            baseUv.y *= -1.0;
+            if (parallax) baseUv += parallaxOffset;
+
+            vec3 col = vec3(0.0);
+            vec2 mouseUv = interactive ? (2.0 * iMouse - iResolution.xy) / iResolution.y : vec2(0.0);
+            if (interactive) mouseUv.y *= -1.0;
+
+            if (enableMiddle) {
+                for (int i = 0; i < 10; i++) {
+                    if (i >= middleLineCount) break;
+                    float t = float(i) / max(float(middleLineCount - 1), 1.0);
+                    vec3 lineCol = getLineColor(t);
+                    float angle = middleWavePosition.z * log(length(baseUv) + 1.0);
+                    vec2 ruv = baseUv * rotate(angle);
+                    col += lineCol * wave(ruv + vec2(middleLineDistance * float(i) + middleWavePosition.x, middleWavePosition.y), 2.0 + 0.15 * float(i), baseUv, mouseUv, interactive);
+                }
+            }
+            gl_FragColor = vec4(col, 1.0);
+        }
+    </script>
+
+    <script>
+        // --- THREE.JS LOGIC ---
+        const container = document.getElementById('bg-canvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        
+        const pixelRatio = Math.min(window.devicePixelRatio, 1.5);
+        renderer.setPixelRatio(pixelRatio);
+        container.appendChild(renderer.domElement);
+
+        const uniforms = {
+            iTime: { value: 0 },
+            iResolution: { value: new THREE.Vector3() },
+            animationSpeed: { value: 1.0 },
+            enableMiddle: { value: true },
+            middleLineCount: { value: 6 },
+            middleLineDistance: { value: 0.05 },
+            middleWavePosition: { value: new THREE.Vector3(5.0, 0.0, 0.2) },
+            iMouse: { value: new THREE.Vector2(-1000, -1000) },
+            interactive: { value: true },
+            bendRadius: { value: 5.0 },
+            bendStrength: { value: -0.5 },
+            bendInfluence: { value: 0 },
+            parallax: { value: true },
+            parallaxOffset: { value: new THREE.Vector2(0, 0) },
+            lineGradientCount: { value: 2 },
+            lineGradient: { value: [
+                new THREE.Vector3(233/255, 71/255, 245/255),
+                new THREE.Vector3(47/255, 75/255, 162/255),
+                ...Array(6).fill(new THREE.Vector3())
+            ]}
+        };
+
+        const material = new THREE.ShaderMaterial({
+            uniforms,
+            vertexShader: document.getElementById('vertexShader').textContent,
+            fragmentShader: document.getElementById('fragmentShader').textContent
+        });
+
+        scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material));
+
+        let targetMouse = new THREE.Vector2();
+        let currentMouse = new THREE.Vector2();
+        let targetInfluence = 0;
+        let currentInfluence = 0;
+
+        const moveHandler = (e) => {
+            const x = e.touches ? e.touches[0].clientX : e.clientX;
+            const y = e.touches ? e.touches[0].clientY : e.clientY;
+            targetMouse.set(x, window.innerHeight - y);
+            targetInfluence = 1.0;
+            const offsetX = (x - window.innerWidth/2) / window.innerWidth;
+            const offsetY = -(y - window.innerHeight/2) / window.innerHeight;
+            uniforms.parallaxOffset.value.set(offsetX * 0.1, offsetY * 0.1);
+        };
+
+        window.addEventListener('pointermove', moveHandler);
+        window.addEventListener('touchmove', moveHandler);
+        window.addEventListener('pointerleave', () => targetInfluence = 0);
+
+        function resize() {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            uniforms.iResolution.value.set(renderer.domElement.width, renderer.domElement.height, 1);
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        const clock = new THREE.Clock();
+        function animate() {
+            uniforms.iTime.value = clock.getElapsedTime();
+            currentMouse.lerp(targetMouse, 0.05);
+            uniforms.iMouse.value.copy(currentMouse);
+            currentInfluence += (targetInfluence - currentInfluence) * 0.05;
+            uniforms.bendInfluence.value = currentInfluence;
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // --- UPDATED MULTI-SENTENCE TYPEWRITER LOGIC ---
+        const textArray = [
+            "Welcome to My Portfolio 🌐",
+            "I Design. I Develop. I Secure 🔐",
+            "Creating the Future with Code 💻",
+            "Let's Build Something Amazing 🚀"
+        ];
+        
+        let textIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        const typeSpeed = 80;
+        const backSpeed = 40;
+        const waitTime = 1000;
+
+        function typeLoop() {
+            const currentSentence = textArray[textIndex];
+            const displayTarget = document.getElementById("typewriter");
+
+            if (isDeleting) {
+                displayTarget.innerHTML = currentSentence.substring(0, charIndex - 1);
+                charIndex--;
+            } else {
+                displayTarget.innerHTML = currentSentence.substring(0, charIndex + 1);
+                charIndex++;
+            }
+
+            if (!isDeleting && charIndex === currentSentence.length) {
+                isDeleting = true;
+                setTimeout(typeLoop, waitTime);
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                textIndex = (textIndex + 1) % textArray.length;
+                setTimeout(typeLoop, 500);
+            } else {
+                setTimeout(typeLoop, isDeleting ? backSpeed : typeSpeed);
+            }
+        }
+
+        // Start typewriter after card entrance
+        setTimeout(typeLoop, 1500);
+    </script>
+</body>
+</html>

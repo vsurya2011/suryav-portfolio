@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificates | Engineering Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+
+        :root {
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --accent: #ffffff;
+        }
+
+        body {
+            background-color: #050505;
+            color: white;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        #fluid-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: auto;
+        }
+
+        .nav-pill {
+            background: rgba(10, 10, 10, 0.6);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            padding: 8px 12px;
+            border-radius: 100px;
+        }
+
+        .nav-link {
+            padding: 8px 20px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #999;
+            transition: 0.3s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .category-header {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 12px 30px;
+            display: inline-block;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-weight: 800;
+        }
+
+        .loop-container {
+            overflow: hidden;
+            width: 100%;
+            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+            padding: 20px 0;
+        }
+
+        .loop-track {
+            display: flex;
+            gap: 24px;
+            width: max-content;
+        }
+
+        .scrolling {
+            animation: scroll 40s linear infinite;
+        }
+
+        .static-track {
+            justify-content: center;
+            width: 100%;
+        }
+
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .ui-card {
+            width: 300px;
+            height: 200px;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            flex-shrink: 0;
+        }
+
+        .ui-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: rgba(255,255,255,0.3);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        }
+
+        .ui-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.8;
+            transition: 0.3s;
+        }
+
+        #mobile-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 90;
+            background: rgba(0, 0, 0, 0.98);
+            backdrop-filter: blur(20px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            clip-path: circle(0% at 100% 0%);
+            transition: clip-path 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+            pointer-events: none;
+        }
+
+        #mobile-overlay.open {
+            clip-path: circle(150% at 100% 0%);
+            pointer-events: auto;
+        }
+
+        #cert-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(15px);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        #cert-modal.open { display: flex; }
+        #modal-img {
+            max-width: 90%;
+            max-height: 70vh;
+            border-radius: 12px;
+            box-shadow: 0 0 50px rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="fluid-canvas"></canvas>
+
+    <nav class="fixed top-8 left-1/2 -translate-x-1/2 z-50 hidden md:block">
+        <div class="nav-pill flex gap-2">
+            <a href="home.html" class="nav-link">Home</a>
+            <a href="about-me.html" class="nav-link">About</a>
+            <a href="Skills.html" class="nav-link">Skills</a>
+            <a href="projects.html" class="nav-link">Projects</a>
+            <a href="internship.html" class="nav-link">Internship</a>
+            <a href="#" class="nav-link active">Certificates</a>
+            <a href="contact.html" class="nav-link">Contact</a>
+        </div>
+    </nav>
+
+    <button onclick="toggleMenu()" class="fixed top-6 right-6 z-[100] p-4 rounded-2xl bg-white text-black md:hidden">
+        <i data-lucide="menu" id="menu-icon"></i>
+    </button>
+
+    <div id="mobile-overlay">
+        <a href="home.html" class="text-3xl font-extrabold opacity-50 hover:opacity-100 transition">Home</a>
+        <a href="about-me.html" class="text-3xl font-extrabold opacity-50 hover:opacity-100 transition">About me</a>
+        <a href="Skills.html" class="text-3xl font-extrabold opacity-50 hover:opacity-100 transition">Skills</a>
+        <a href="projects.html" class="text-3xl font-extrabold opacity-50 hover:opacity-100 transition">Projects</a>
+        <a href="internship.html" class="text-3xl font-extrabold opacity-50 hover:opacity-100 transition">Internship</a>
+        <a href="#" class="text-3xl font-extrabold text-white">Certificates</a>
+        <a href="contact.html" class="text-3xl font-extrabold opacity-50 hover:opacity-100 transition">Contact</a>
+    </div>
+
+    <main class="relative z-10 pt-32 pb-20 px-6 text-center" id="main-content">
+        <h1 class="text-5xl font-extrabold mb-20 tracking-tighter">CERTIFICATIONS</h1>
+    </main>
+
+    <div id="cert-modal" onclick="closeModal()">
+        <div class="relative flex flex-col items-center" onclick="event.stopPropagation()">
+            <img id="modal-img" src="" alt="Full view">
+            <div class="mt-8 flex gap-4">
+                <button id="download-pdf-btn" onclick="downloadAsPDF()" class="bg-white text-black px-8 py-4 rounded-xl font-bold uppercase text-xs tracking-widest hover:bg-gray-200 transition flex items-center gap-2">
+                    <i data-lucide="download" class="w-4 h-4"></i> Download PDF
+                </button>
+                <button onclick="closeModal()" class="bg-white/10 text-white px-8 py-4 rounded-xl font-bold uppercase text-xs border border-white/20">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const certData = {
+            "CISCO ACADEMY": [
+                { src: 'cisco-data-analytics-essentials.png' },
+                { src: 'cisco-ethical hacker.png' },
+                { src: 'cisco-Intro to Cybersecurity.png' },
+                { src: 'cisco-Intro to Data Science.png' },
+                { src: 'cisco-Intro2IoT.png' }
+            ],
+            "INFOSYS": [
+                { src: 'infosys.png' },
+                { src: 'infosys1 introduction to datascience.png' },
+                { src: 'infosys2 introduction to natural languaging.png' },
+                { src: 'infosys3 introduction to AI.jpg' },
+                { src: 'infosys4 intro to Deep learning.jpg' },
+                { src: 'infosys5 computer vision 101.jpg' },
+                { src: 'infosys6 intro to robotic process automation.jpg' },
+                { src: 'infosys7 time management.jpg' },
+                { src: 'infosys8 email writing skills.jpg' },
+                { src: 'infosys9 high impact presentation.jpg' },
+                { src: 'infosys10 intro to open AI.jpg' },
+                { src: 'infosys11 open AI generative.jpg' },
+                { src: 'infosys 12 generative models for developers.jpg' },
+                { src: 'infosys 13 deep learning for developers.jpg' },
+                { src: 'infosys 14 AI.jpg' },
+                { src: 'infosys 15 generative AI.jpg' },
+                { src: 'infosys 16 prompt Enngineering.jpg' },
+                { src: 'infosys 17 Agile Scrum in Practice.jpg' },
+                { src: 'infosys 18 AI Primer certification.jpg' },
+                { src: 'infosys 19 principles of generative AI.jpg' },
+                { src: 'infosys 20 cycbersecutity to digitial transformation.jpg' }
+            ],
+            "MICROSOFT": [
+                { src: 'Microsoft1.png' }, { src: 'Microsoft2.png' }, { src: 'Microsoft3.png' },
+                { src: 'Microsoft4.png' }, { src: 'Microsoft5.png' }, { src: 'Microsoft6.png' },
+                { src: 'Microsoft7.png' }, { src: 'Microsoft8.png' }, { src: 'Microsoft9.png' },
+                { src: 'Microsoft10.png' }
+            ],
+            "IBM": [
+                { src: 'IBM-Cybersecurity Fundamentals.png' },
+                { src: 'IBM-cybersecurity-fundamentals.png' },
+                { src: 'IBM-introduction-to-mobile-app-development.png' },
+                { src: 'IBM-Project Management Fundamentals.png' },
+                { src: 'IBM-project-management-fundamentals.4.png' }
+            ],
+            "SIMPLILEARN": [
+                { src: 'Simplilearn exploring data.png' },
+                { src: 'Simplilearn gemini in gdrive.png' },
+                { src: 'Simplilearn google docs.png' },
+                { src: 'Simplilearn Innovating with gcloud ai.png' },
+                { src: 'Simplilearn intro to cycbersecurity.png' },
+                { src: 'Simplilearn intro to iot.png' }
+            ],
+            "NOVI TECH": [
+                { src: 'NT- Full Stack Development.png' },
+                { src: 'NT-Create dashboard.png' },
+                { src: 'NT-handtracking mouse.png' },
+                { src: 'NT-java boot camp.png' },
+                { src: 'NT-Real-Time Color Detection System Using OpenCV.png' },
+                { src: 'NT-Social media under attack.png' },
+                
+            ],
+            "HACKERRANK": [
+                { src: 'HackerRank-javascript_basic .png' },
+                { src: 'HackerRank-problem_solving_basic .png' },
+                { src: 'HackerRank-python_basic.png' },
+                { src: 'HackerRank-rest API.png' },
+                { src: 'HackerRank-sql_basic.png' }
+            ],
+            "INTERNSHIP": [
+                { src: 'Internship-Intelizign.jpg' },
+                { src: 'Internship-MSME(nsic).jpg' },
+                { src: 'Internship-Cod soft.png' },
+                { src: 'internship-infosys.png' },
+                { src: 'Internship-N tech Workshop.png' }
+            ],
+            "NPTEL": [
+                { src: 'NPTEL-Data Base Management System.png' },
+                { src: 'NPTEL-Google cloud computing.png' },
+                { src: 'NPTEL-The Joy of Computing using Python.png' }
+            ],
+            "COURSERA": [
+                { src: 'coursera-IBM.jpg' },
+                { src: 'Coursera-Mobile app development.png' }
+            ],
+            "GREAT LEARNING": [
+                { src: 'Greatlearning-Excel.jpg' },
+                { src: 'Greatlearning-UI and UX.jpg' }
+            ],
+            "MONGO DB": [
+                { src: 'Mongo DB query optimization.png' },
+                { src: 'MongoDB-Building AI Agents.png' },
+                { src: 'mongodb-query-optimization-techniques.png' }
+            ],
+            "CSS": [{ src: 'CSS.png' }],
+            "GOOGLE": [{ src: 'Google-devops.png' }],
+            "HP": [{ src: 'Hp-AI for Beginners.png' }],
+            "NVIDIA": [{ src: 'NVIDIA-OpenUSD.png' }],
+            "ORACLE": [{ src: 'Oracle.jpg' }, { src: 'Oracle.png' }]
+        };
+
+        function initGallery() {
+            const main = document.getElementById('main-content');
+            
+            Object.keys(certData).forEach(catName => {
+                const items = certData[catName];
+                const section = document.createElement('section');
+                section.className = 'mb-24';
+                
+                const trackId = `track-${catName.replace(/\s+/g, '-').toLowerCase()}`;
+                const isScrolling = items.length > 3;
+
+                section.innerHTML = `
+                    <div class="category-header">${catName}</div>
+                    <div class="loop-container">
+                        <div class="loop-track ${isScrolling ? 'scrolling' : 'static-track'}" id="${trackId}"></div>
+                    </div>
+                `;
+                main.appendChild(section);
+
+                const track = document.getElementById(trackId);
+                const displayItems = isScrolling ? [...items, ...items] : items;
+
+                displayItems.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'ui-card';
+                    card.innerHTML = `<img src="${item.src}" onerror="this.src='https://via.placeholder.com/300x200?text=${catName}'">`;
+                    card.onclick = () => openModal(item.src);
+                    track.appendChild(card);
+                });
+            });
+        }
+
+        function toggleMenu() {
+            const overlay = document.getElementById('mobile-overlay');
+            const icon = document.getElementById('menu-icon');
+            overlay.classList.toggle('open');
+            icon.setAttribute('data-lucide', overlay.classList.contains('open') ? 'x' : 'menu');
+            lucide.createIcons();
+        }
+
+        function openModal(src) {
+            const modalImg = document.getElementById('modal-img');
+            modalImg.src = src;
+            document.getElementById('cert-modal').classList.add('open');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function closeModal() {
+            document.getElementById('cert-modal').classList.remove('open');
+            document.body.style.overflow = 'auto';
+        }
+
+        async function downloadAsPDF() {
+            const imgElement = document.getElementById('modal-img');
+            const btn = document.getElementById('download-pdf-btn');
+            const originalHTML = btn.innerHTML;
+            btn.innerText = "GENERATING...";
+            
+            if (!imgElement.complete || imgElement.naturalWidth === 0) {
+                alert("Image not loaded yet.");
+                btn.innerHTML = originalHTML;
+                lucide.createIcons();
+                return;
+            }
+
+            try {
+                const fileName = imgElement.src.split('/').pop().split('.')[0];
+                const response = await fetch(imgElement.src);
+                const blob = await response.blob();
+                const reader = new FileReader();
+                reader.readAsDataURL(blob);
+                reader.onloadend = function() {
+                    const base64data = reader.result;
+                    const { jsPDF } = window.jspdf;
+                    const orientation = imgElement.naturalWidth > imgElement.naturalHeight ? 'l' : 'p';
+                    const pdf = new jsPDF({
+                        orientation: orientation,
+                        unit: 'px',
+                        format: [imgElement.naturalWidth, imgElement.naturalHeight]
+                    });
+                    pdf.addImage(base64data, 'JPEG', 0, 0, imgElement.naturalWidth, imgElement.naturalHeight);
+                    pdf.save(fileName + ".pdf");
+                    btn.innerHTML = originalHTML;
+                    lucide.createIcons();
+                };
+            } catch (error) {
+                btn.innerHTML = originalHTML;
+                lucide.createIcons();
+            }
+        }
+
+        (function() {
+            const canvas = document.getElementById('fluid-canvas');
+            const resize = () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            };
+            window.addEventListener('resize', resize);
+            resize();
+        })();
+
+        window.onload = () => {
+            initGallery();
+            lucide.createIcons();
+        };
+    </script>
+</body>
+</html>

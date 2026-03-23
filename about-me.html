@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Me | Surya V</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+
+        :root {
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            background-color: #050505;
+            color: white;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            filter: blur(60px);
+            opacity: 0.3;
+        }
+
+        /* --- MODERN UI CARDS --- */
+        .ui-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ui-card:hover {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-8px) scale(1.01);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .ui-card::after {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.03), transparent);
+            transform: rotate(45deg);
+            transition: 0.8s;
+            pointer-events: none;
+        }
+
+        .ui-card:hover::after {
+            left: 100%;
+            top: 100%;
+        }
+
+        /* --- NAVIGATION --- */
+        .nav-pill {
+            background: rgba(10, 10, 10, 0.6);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            padding: 8px 12px;
+            border-radius: 100px;
+        }
+
+   .nav-link {
+            padding: 8px 18px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #999;
+            transition: 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* --- MOBILE MENU --- */
+        .mobile-toggle {
+            background: white !important;
+            color: black !important;
+            border: none !important;
+        }
+
+        #mobile-overlay {
+            clip-path: circle(0% at 100% 0%);
+            transition: clip-path 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+        }
+
+        #mobile-overlay.open {
+            clip-path: circle(150% at 100% 0%);
+        }
+
+        .bento-label {
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            opacity: 0.5;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .plus-list li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+            opacity: 0.8;
+            line-height: 1.6;
+        }
+
+        .plus-list li::before {
+            content: "+";
+            position: absolute;
+            left: 0;
+            color: white;
+            font-weight: 800;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <div id="bg-canvas"></div>
+
+    <nav class="fixed top-8 left-1/2 -translate-x-1/2 z-50 hidden xl:block">
+        <div class="nav-pill flex gap-1">
+            <a href="home.html" class="nav-link">Home</a>
+            <a href="#" class="nav-link active">About me</a>
+            <a href="Skills.html" class="nav-link">Skills</a>
+            <a href="#projects" class="nav-link">Projects</a>
+            <a href="internship.html" class="nav-link">Internship</a>
+            <a href="certificate.html" class="nav-link">Certificates</a>
+            <a href="contact.html" class="nav-link">Contact</a>
+        </div>
+    </nav>
+
+    <button onclick="toggleMenu()" class="fixed top-6 right-6 z-[100] p-4 rounded-2xl mobile-toggle xl:hidden">
+        <i data-lucide="menu" id="menu-icon"></i>
+    </button>
+
+    <div id="mobile-overlay" class="fixed inset-0 z-[90] flex flex-col items-center justify-center gap-6 xl:hidden">
+        <a href="home.html" class="text-2xl font-extrabold text-neutral-500 hover:text-white transition-colors">Home</a>
+        <a href="#" class="text-2xl font-extrabold text-white transition-colors">About me</a>
+        <a href="Skills.html" class="text-2xl font-extrabold text-neutral-500 hover:text-white transition-colors">Skills</a>
+        <a href="#projects" class="text-2xl font-extrabold text-neutral-500 hover:text-white transition-colors">Projects</a>
+        <a href="internship.html" class="text-2xl font-extrabold text-neutral-500 hover:text-white transition-colors">Internship</a>
+        <a href="certificate.html" class="text-2xl font-extrabold text-neutral-500 hover:text-white transition-colors">Certificates</a>
+        <a href="contact.html" class="text-2xl font-extrabold text-neutral-500 hover:text-white transition-colors">Contact</a>
+    </div>
+
+    <main class="container mx-auto px-6 pt-32 pb-12 lg:pt-44">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <div class="lg:col-span-8 flex flex-col gap-6">
+                
+                <div class="ui-card py-8 w-full flex items-center justify-center">
+                    <span class="text-lg font-extrabold tracking-[0.20em] uppercase opacity-90">About Me</span>
+                </div>
+
+                <div class="ui-card p-10 md:p-14 bg-white !text-black">
+                    <span class="bento-label !text-black/50">Bio / Introduction</span>
+                    <h2 class="text-3xl md:text-5xl font-extrabold leading-tight mb-6">Hi, I'm Surya V.</h2>
+                    <p class="text-lg md:text-xl font-medium opacity-80 leading-relaxed">
+                        I'm passionate about technology, creativity, and problem-solving. My journey started with a curiosity to understand how things work, which naturally grew into learning programming, building projects, and exploring real-world applications of tech.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
+                    <div class="ui-card p-8">
+                        <span class="bento-label">What I Do</span>
+                        <ul class="plus-list">
+                            <li>Develop apps, games, and web projects that combine functionality with simplicity.</li>
+                            <li>Work on AI, Machine Learning, and innovative problem-solving projects.</li>
+                            <li>Constantly learn and share knowledge through hands-on practice.</li>
+                        </ul>
+                    </div>
+
+                    <div class="ui-card p-8">
+                        <span class="bento-label">Interests</span>
+                        <ul class="plus-list">
+                            <li>Exploring new technologies and frameworks.</li>
+                            <li>Creating user-friendly apps & websites.</li>
+                            <li>Artificial Intelligence, Deep Learning, and Data Science.</li>
+                            <li>Community Learning.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-4 flex flex-col gap-6">
+                
+                <div class="ui-card photo-card h-[400px] lg:h-[500px]">
+                    <img src="surya-v-profile.jpeg" class="w-full h-full object-cover transition-transform duration-700 hover:scale-110" alt="Surya V">
+                </div>
+
+                <a href="resume.pdf" class="ui-card p-10 flex flex-col items-center justify-center gap-4 group flex-1">
+                    <div class="bg-white/10 p-5 rounded-full group-hover:scale-110 group-hover:bg-white group-hover:text-black transition-all">
+                        <i data-lucide="file-text" class="w-8 h-8"></i>
+                    </div>
+                    <span class="text-2xl font-black tracking-tighter">VIEW RESUME</span>
+                    <p class="text-xs font-bold opacity-40 uppercase tracking-widest">📃</p>
+                </a>
+
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        function toggleMenu() {
+            const overlay = document.getElementById('mobile-overlay');
+            const icon = document.getElementById('menu-icon');
+            const isOpen = overlay.classList.toggle('open');
+            icon.setAttribute('data-lucide', isOpen ? 'x' : 'menu');
+            lucide.createIcons();
+        }
+
+        // --- BACKGROUND SHADER ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.Camera();
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('bg-canvas').appendChild(renderer.domElement);
+
+        const material = new THREE.ShaderMaterial({
+            uniforms: {
+                iTime: { value: 0 },
+                iResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }
+            },
+            vertexShader: `void main() { gl_Position = vec4(position, 1.0); }`,
+            fragmentShader: `
+                precision highp float;
+                uniform float iTime;
+                uniform vec2 iResolution;
+                void main() {
+                    vec2 uv = gl_FragCoord.xy / iResolution.xy;
+                    vec3 col = 0.5 + 0.5 * cos(iTime + uv.xyx + vec3(0,2,4));
+                    gl_FragColor = vec4(col * 0.12, 1.0);
+                }
+            `
+        });
+
+        scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material));
+
+        function animate(time) {
+            material.uniforms.iTime.value = time * 0.0008;
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            material.uniforms.iResolution.value.set(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surya V | Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+
+        :root {
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            background-color: #050505;
+            color: white;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            filter: blur(60px);
+            opacity: 0.3;
+        }
+
+        /* --- MODERN UI CARDS --- */
+        .ui-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ui-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-5px);
+        }
+
+        /* --- NAVIGATION --- */
+        .nav-pill {
+            background: rgba(10, 10, 10, 0.6);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            padding: 8px 12px;
+            border-radius: 100px;
+        }
+
+        .nav-link {
+            padding: 8px 20px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #999;
+            transition: 0.3s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* --- MOBILE MENU FIX --- */
+        .mobile-toggle {
+            background: white !important;
+            color: black !important;
+            border: none !important;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+
+        #mobile-overlay {
+            clip-path: circle(0% at 100% 0%);
+            transition: clip-path 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+        }
+
+        #mobile-overlay.open {
+            clip-path: circle(150% at 100% 0%);
+        }
+
+        /* --- UPDATED ROLE CARD SECTION --- */
+        .rotating-card-container {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            padding: 5px 0;
+        }
+
+        .rotating-card-container h4 {
+            font-weight: 800;
+            letter-spacing: 0.3em;
+            opacity: 0.3;
+            font-size: 0.9rem;
+        }
+
+        .role-pill {
+            background: white;
+            color: black;
+            border-radius: 100px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            transition: width 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            box-shadow: 0 10px 30px rgba(255,255,255,0.1);
+        }
+
+        .role-slot {
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .role-slot span {
+            height: 60px; /* Matched to pill height */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1rem;
+            white-space: nowrap;
+            padding: 0 25px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .photo-card {
+            background: #ffffff;
+            color: #000;
+            position: relative;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <div id="bg-canvas"></div>
+
+    <nav class="fixed top-8 left-1/2 -translate-x-1/2 z-50 hidden md:block">
+        <div class="nav-pill flex gap-2">
+            <a href="#" class="nav-link active">Home</a>
+            <a href="about-me.html" class="nav-link">About me</a>
+            <a href="Skills.html" class="nav-link">Skills</a>
+            <a href="#projects" class="nav-link">Projects</a>
+            <a href="internship.html" class="nav-link">Internship</a>
+            <a href="certificate.html" class="nav-link">Certificates</a>
+            <a href="contact.html" class="nav-link">Contact</a>
+        </div>
+    </nav>
+
+    <button onclick="toggleMenu()" class="fixed top-6 right-6 z-[100] p-4 rounded-2xl mobile-toggle md:hidden">
+        <i data-lucide="menu" id="menu-icon"></i>
+    </button>
+
+    <div id="mobile-overlay" class="fixed inset-0 z-[90] flex flex-col items-center justify-center gap-6 md:hidden">
+        <a href="#" onclick="toggleMenu()" class="text-3xl font-extrabold hover:text-white transition-colors">Home</a>
+        <a href="about-me.html" onclick="toggleMenu()" class="text-3xl font-extrabold text-neutral-500 hover:text-white transition-colors">About</a>
+        <a href="Skills.html" onclick="toggleMenu()" class="text-3xl font-extrabold text-neutral-500 hover:text-white transition-colors">Skills</a>
+        <a href="#projects" onclick="toggleMenu()" class="text-3xl font-extrabold text-neutral-500 hover:text-white transition-colors">Projects</a>
+        <a href="internship.html" onclick="toggleMenu()" class="text-3xl font-extrabold text-neutral-500 hover:text-white transition-colors">Internship</a>
+        <a href="certificate.html" onclick="toggleMenu()" class="text-3xl font-extrabold text-neutral-500 hover:text-white transition-colors">Certificates</a>
+        <a href="contact.html" onclick="toggleMenu()" class="text-3xl font-extrabold text-neutral-500 hover:text-white transition-colors">Contact</a>
+    </div>
+
+    <main class="container mx-auto px-6 pt-32 pb-12 lg:pt-48">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            
+            <div class="lg:col-span-7 flex flex-col gap-6">
+                
+                <div class="ui-card py-8 w-full"> <span class="text-lg font-extrabold tracking-[0.20em] uppercase opacity-90">Home</span> </div>
+
+                <div class="ui-card p-10 flex-col !items-start bg-white !text-black shadow-[0_0_50px_rgba(255,255,255,0.05)]">
+                    <p class="text-sm font-black opacity-70 mb-2 uppercase tracking-widest">Hello, I'm</p> <h1 class="text-6xl md:text-8xl font-black leading-none tracking-tighter">SURYA V</h1>
+                </div>
+
+
+                <div class="rotating-card-container">
+                    <h4>I_AM_A</h4>
+                    <div class="role-pill" id="rolePill">
+                        <div class="role-slot" id="roleSlot">
+
+ <span>Active Participate</span>
+                            <span>Problem Solver</span>
+                            <span>Developer</span>
+                            <span>Engineer</span>
+                            <span>UI/UX Designer</span>
+                            <span>Creator</span>
+                            <span>Open Source Contributor</span>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="resume.pdf" class="ui-card p-8 group overflow-hidden relative">
+                    <div class="flex justify-between w-full items-center">
+                        <span class="text-2xl font-black group-hover:translate-x-2 transition-transform">VIEW RESUME</span>
+                        <i data-lucide="arrow-up-right" class="w-8 h-8 opacity-40 group-hover:opacity-100 group-hover:rotate-45 transition-all"></i>
+                    </div>
+                </a>
+            </div>
+
+            <div class="lg:col-span-5">
+                <div class="ui-card photo-card h-[600px] lg:h-full min-h-[450px]">
+                    <img src="surya-v-profile.jpeg" class="w-full h-full object-cover rounded-[32px]">
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        function toggleMenu() {
+            const overlay = document.getElementById('mobile-overlay');
+            const icon = document.getElementById('menu-icon');
+            const isOpen = overlay.classList.toggle('open');
+            icon.setAttribute('data-lucide', isOpen ? 'x' : 'menu');
+            lucide.createIcons();
+        }
+
+        // --- SEAMLESS ROLE SCROLLER ---
+        const roleSlot = document.getElementById('roleSlot');
+        const rolePill = document.getElementById('rolePill');
+        const roles = roleSlot.querySelectorAll('span');
+        let roleIndex = 0;
+        const totalRoles = roles.length;
+
+        function updateRole() {
+            roleIndex++;
+            
+            // Enable transition for movement
+            roleSlot.style.transition = "transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)";
+            
+            // Move to next role
+            roleSlot.style.transform = `translateY(-${roleIndex * 60}px)`;
+            
+            // Update width based on the current visible role
+            // We use modulo to handle the width of the "clone" correctly
+            const widthIndex = roleIndex % (totalRoles - 1);
+            rolePill.style.width = `${roles[widthIndex].offsetWidth}px`;
+        }
+
+        // Check for the end of the transition to snap back
+        roleSlot.addEventListener('transitionend', () => {
+            if (roleIndex >= totalRoles - 1) {
+                roleSlot.style.transition = "none"; // Disable animation
+                roleIndex = 0;
+                roleSlot.style.transform = `translateY(0px)`;
+            }
+        });
+
+        // Initialize width
+        rolePill.style.width = `${roles[0].offsetWidth}px`;
+        
+        // Interval for rotation
+        setInterval(updateRole, 2500);
+
+        // --- BACKGROUND SHADER ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.Camera();
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('bg-canvas').appendChild(renderer.domElement);
+
+        const material = new THREE.ShaderMaterial({
+            uniforms: {
+                iTime: { value: 0 },
+                iResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }
+            },
+            vertexShader: `void main() { gl_Position = vec4(position, 1.0); }`,
+            fragmentShader: `
+                precision highp float;
+                uniform float iTime;
+                uniform vec2 iResolution;
+                void main() {
+                    vec2 uv = gl_FragCoord.xy / iResolution.xy;
+                    vec3 col = 0.5 + 0.5 * cos(iTime + uv.xyx + vec3(0,2,4));
+                    gl_FragColor = vec4(col * 0.12, 1.0);
+                }
+            `
+        });
+
+        scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material));
+
+        function animate(time) {
+            material.uniforms.iTime.value = time * 0.0008;
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            material.uniforms.iResolution.value.set(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
