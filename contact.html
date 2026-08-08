@@ -265,70 +265,228 @@
             lucide.createIcons();
         }
 
-        // --- SHADER ANIMATION ---
-        const scene = new THREE.Scene();
-        const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setPixelRatio(window.devicePixelRatio);
-        document.getElementById('magic-rings-canvas').appendChild(renderer.domElement);
+        // --- MAGIC RINGS SHADER (ported from MagicRings.jsx) ---
+        (function () {
+            const mount = document.getElementById('magic-rings-canvas');
 
-        const uniforms = {
-            uTime: { value: 0 },
-            uResolution: { value: new THREE.Vector2() },
-            uMouse: { value: new THREE.Vector2() },
-            uColor: { value: new THREE.Color('#fc42ff') },
-            uColorTwo: { value: new THREE.Color('#42fcff') }
-        };
+            // Config (matches the MagicRings React component props for this page)
+            const cfg = {
+                color: '#A855F7',
+                colorTwo: '#6366F1',
+                speed: 1,
+                ringCount: 6,
+                attenuation: 10,
+                lineThickness: 2,
+                baseRadius: 0.35,
+                radiusStep: 0.1,
+                scaleRate: 0.1,
+                opacity: 1,
+                noiseAmount: 0.1,
+                rotation: 0,
+                ringGap: 1.5,
+                fadeIn: 0.7,
+                fadeOut: 0.5,
+                followMouse: false,
+                mouseInfluence: 0.2,
+                hoverScale: 1.2,
+                parallax: 0.05,
+                clickBurst: false
+            };
 
-        const material = new THREE.ShaderMaterial({
-            vertexShader: `void main() { gl_Position = vec4(position, 1.0); }`,
-            fragmentShader: `
+            const vertexShader = `
+                void main() {
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `;
+
+            const fragmentShader = `
                 precision highp float;
-                uniform float uTime;
+
+                uniform float uTime, uAttenuation, uLineThickness;
+                uniform float uBaseRadius, uRadiusStep, uScaleRate;
+                uniform float uOpacity, uNoiseAmount, uRotation, uRingGap;
+                uniform float uFadeIn, uFadeOut;
+                uniform float uMouseInfluence, uHoverAmount, uHoverScale, uParallax, uBurst;
                 uniform vec2 uResolution, uMouse;
                 uniform vec3 uColor, uColorTwo;
-                
-                void main() {
-                    vec2 p = (gl_FragCoord.xy - 0.5 * uResolution.xy) / min(uResolution.y, uResolution.x);
-                    p -= uMouse * 0.05;
-                    vec3 color = vec3(0.0);
-                    for(float i=0.0; i<6.0; i++) {
-                        float t = uTime * 0.3 + i * 0.8;
-                        float r = mod(t, 2.8) * 0.45;
-                        float d = abs(length(p) - r);
-                        float ringVal = smoothstep(0.002, 0.0, d);
-                        color += mix(uColor, uColorTwo, i/6.0) * ringVal * smoothstep(1.0, 0.0, r);
-                    }
-                    gl_FragColor = vec4(color, length(color) * 0.6);
+                uniform int uRingCount;
+
+                const float HP = 1.5707963;
+                const float CYCLE = 3.45;
+
+                float fade(float t) {
+                    return t < uFadeIn ? smoothstep(0.0, uFadeIn, t) : 1.0 - smoothstep(uFadeOut, CYCLE - 0.2, t);
                 }
-            `,
-            uniforms,
-            transparent: true
-        });
 
-        scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material));
+                float ring(vec2 p, float ri, float cut, float t0, float px) {
+                    float t = mod(uTime + t0, CYCLE);
+                    float r = ri + t / CYCLE * uScaleRate;
+                    float d = abs(length(p) - r);
+                    float a = atan(abs(p.y), abs(p.x)) / HP;
+                    float th = max(1.0 - a, 0.5) * px * uLineThickness;
+                    float h = (1.0 - smoothstep(th, th * 1.5, d)) + 1.0;
+                    d += pow(cut * a, 3.0) * r;
+                    return h * exp(-uAttenuation * d) * fade(t);
+                }
 
-        let mx = 0, my = 0;
-        window.addEventListener('mousemove', (e) => {
-            mx = (e.clientX / window.innerWidth) - 0.5;
-            my = -((e.clientY / window.innerHeight) - 0.5);
-        });
+                void main() {
+                    float px = 1.0 / min(uResolution.x, uResolution.y);
+                    vec2 p = (gl_FragCoord.xy - 0.5 * uResolution.xy) * px;
+                    float cr = cos(uRotation), sr = sin(uRotation);
+                    p = mat2(cr, -sr, sr, cr) * p;
+                    p -= uMouse * uMouseInfluence;
+                    float sc = mix(1.0, uHoverScale, uHoverAmount) + uBurst * 0.3;
+                    p /= sc;
+                    vec3 c = vec3(0.0);
+                    float rcf = max(float(uRingCount) - 1.0, 1.0);
+                    for (int i = 0; i < 10; i++) {
+                        if (i >= uRingCount) break;
+                        float fi = float(i);
+                        vec2 pr = p - fi * uParallax * uMouse;
+                        vec3 rc = mix(uColor, uColorTwo, fi / rcf);
+                        c = mix(c, rc, vec3(ring(pr, uBaseRadius + fi * uRadiusStep, pow(uRingGap, fi), i == 0 ? 0.0 : 2.95 * fi, px)));
+                    }
+                    c *= 1.0 + uBurst * 2.0;
+                    float n = fract(sin(dot(gl_FragCoord.xy + uTime * 100.0, vec2(12.9898, 78.233))) * 43758.5453);
+                    c += (n - 0.5) * uNoiseAmount;
+                    gl_FragColor = vec4(c, max(c.r, max(c.g, c.b)) * uOpacity);
+                }
+            `;
 
-        function resize() {
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            uniforms.uResolution.value.set(window.innerWidth, window.innerHeight);
-        }
-        window.addEventListener('resize', resize);
-        resize();
+            let renderer;
+            try {
+                renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            } catch (e) {
+                return;
+            }
 
-        function animate(t) {
-            uniforms.uTime.value = t * 0.001;
-            uniforms.uMouse.value.x += (mx - uniforms.uMouse.value.x) * 0.05;
-            uniforms.uMouse.value.y += (my - uniforms.uMouse.value.y) * 0.05;
-            renderer.render(scene, camera);
-            requestAnimationFrame(animate);
-        }
-        animate(0);
+            renderer.setClearColor(0x000000, 0);
+            mount.appendChild(renderer.domElement);
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.OrthographicCamera(-0.5, 0.5, 0.5, -0.5, 0.1, 10);
+            camera.position.z = 1;
+
+            const uniforms = {
+                uTime: { value: 0 },
+                uAttenuation: { value: cfg.attenuation },
+                uResolution: { value: new THREE.Vector2() },
+                uColor: { value: new THREE.Color(cfg.color) },
+                uColorTwo: { value: new THREE.Color(cfg.colorTwo) },
+                uLineThickness: { value: cfg.lineThickness },
+                uBaseRadius: { value: cfg.baseRadius },
+                uRadiusStep: { value: cfg.radiusStep },
+                uScaleRate: { value: cfg.scaleRate },
+                uRingCount: { value: cfg.ringCount },
+                uOpacity: { value: cfg.opacity },
+                uNoiseAmount: { value: cfg.noiseAmount },
+                uRotation: { value: (cfg.rotation * Math.PI) / 180 },
+                uRingGap: { value: cfg.ringGap },
+                uFadeIn: { value: cfg.fadeIn },
+                uFadeOut: { value: cfg.fadeOut },
+                uMouse: { value: new THREE.Vector2() },
+                uMouseInfluence: { value: cfg.followMouse ? cfg.mouseInfluence : 0 },
+                uHoverAmount: { value: 0 },
+                uHoverScale: { value: cfg.hoverScale },
+                uParallax: { value: cfg.parallax },
+                uBurst: { value: 0 }
+            };
+
+            const material = new THREE.ShaderMaterial({ vertexShader, fragmentShader, uniforms, transparent: true });
+            const quad = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), material);
+            scene.add(quad);
+
+            const mouseRef = [0, 0];
+            const smoothMouseRef = [0, 0];
+            let hoverAmount = 0;
+            let isHovered = false;
+            let burst = 0;
+
+            function resize() {
+                const w = mount.clientWidth || window.innerWidth;
+                const h = mount.clientHeight || window.innerHeight;
+                const dpr = Math.min(window.devicePixelRatio || 1, 2);
+                renderer.setSize(w, h);
+                renderer.setPixelRatio(dpr);
+                uniforms.uResolution.value.set(w * dpr, h * dpr);
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            const ro = new ResizeObserver(resize);
+            ro.observe(mount);
+
+            function onMouseMove(e) {
+                const rect = mount.getBoundingClientRect();
+                mouseRef[0] = (e.clientX - rect.left) / rect.width - 0.5;
+                mouseRef[1] = -((e.clientY - rect.top) / rect.height - 0.5);
+            }
+            function onMouseEnter() { isHovered = true; }
+            function onMouseLeave() {
+                isHovered = false;
+                mouseRef[0] = 0;
+                mouseRef[1] = 0;
+            }
+            function onClick() { burst = 1; }
+
+            window.addEventListener('mousemove', onMouseMove);
+            mount.addEventListener('mouseenter', onMouseEnter);
+            mount.addEventListener('mouseleave', onMouseLeave);
+            mount.addEventListener('click', onClick);
+
+            let frameId = 0;
+            let isVisible = true;
+            let isPageVisible = !document.hidden;
+            let elapsed = 0;
+            let lastT = 0;
+
+            function animate(t) {
+                frameId = requestAnimationFrame(animate);
+
+                const dt = lastT === 0 ? 0 : Math.min(t - lastT, 100);
+                lastT = t;
+                elapsed += dt * 0.001 * cfg.speed;
+
+                smoothMouseRef[0] += (mouseRef[0] - smoothMouseRef[0]) * 0.08;
+                smoothMouseRef[1] += (mouseRef[1] - smoothMouseRef[1]) * 0.08;
+                hoverAmount += ((isHovered ? 1 : 0) - hoverAmount) * 0.08;
+                burst *= 0.95;
+                if (burst < 0.001) burst = 0;
+
+                uniforms.uTime.value = elapsed;
+                uniforms.uMouse.value.set(smoothMouseRef[0], smoothMouseRef[1]);
+                uniforms.uHoverAmount.value = hoverAmount;
+                uniforms.uBurst.value = cfg.clickBurst ? burst : 0;
+
+                renderer.render(scene, camera);
+            }
+
+            function tryStart() {
+                if (isVisible && isPageVisible && frameId === 0) {
+                    lastT = 0;
+                    frameId = requestAnimationFrame(animate);
+                }
+            }
+            function tryStop() {
+                if (frameId !== 0) {
+                    cancelAnimationFrame(frameId);
+                    frameId = 0;
+                }
+            }
+
+            const io = new IntersectionObserver(([entry]) => {
+                isVisible = entry.isIntersecting;
+                isVisible ? tryStart() : tryStop();
+            }, { threshold: 0 });
+            io.observe(mount);
+
+            document.addEventListener('visibilitychange', () => {
+                isPageVisible = !document.hidden;
+                isPageVisible ? tryStart() : tryStop();
+            });
+
+            tryStart();
+        })();
     </script>
 </body>
 </html>
