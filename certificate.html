@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>Certificates | Engineering Portfolio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -16,21 +16,32 @@
             --accent: #ffffff;
         }
 
+        * { box-sizing: border-box; }
+
+        html { -webkit-text-size-adjust: 100%; }
+
         body {
             background-color: #050505;
             color: white;
             font-family: 'Plus Jakarta Sans', sans-serif;
             overflow-x: hidden;
+            margin: 0;
         }
 
-        #fluid-canvas {
+        /* ===== Floating lines shader background ===== */
+        #floating-lines-bg {
             position: fixed;
-            top: 0;
-            left: 0;
+            inset: 0;
             width: 100%;
             height: 100%;
             z-index: -1;
+            overflow: hidden;
             pointer-events: auto;
+            mix-blend-mode: screen;
+        }
+
+        #floating-lines-bg canvas {
+            display: block;
         }
 
         .nav-pill {
@@ -42,12 +53,13 @@
         }
 
         .nav-link {
-            padding: 8px 20px;
+            padding: 8px 16px;
             border-radius: 100px;
             font-size: 0.85rem;
             font-weight: 500;
             color: #999;
             transition: 0.3s;
+            white-space: nowrap;
         }
 
         .nav-link:hover, .nav-link.active {
@@ -55,39 +67,104 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
-        .category-header {
+        .page-title {
+            font-size: clamp(2rem, 7vw, 3rem);
+        }
+
+        /* ===== Compartment (accordion) ===== */
+        .compartment {
+            margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+        }
+
+        .compartment-header {
+            width: 100%;
             background: var(--glass);
             backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 12px 30px;
-            display: inline-block;
-            margin-bottom: 2rem;
+            border-radius: 20px;
+            padding: clamp(10px, 2vw, 14px) clamp(16px, 4vw, 30px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 0;
+            cursor: pointer;
+            color: white;
+            font-family: inherit;
+            transition: 0.3s;
+        }
+
+        .compartment-header:hover {
+            border-color: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .compartment-name {
             text-transform: uppercase;
-            letter-spacing: 4px;
+            letter-spacing: clamp(1px, 0.6vw, 4px);
             font-weight: 800;
+            font-size: clamp(0.75rem, 2.5vw, 1rem);
+        }
+
+        .compartment-count {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #999;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 100px;
+            padding: 2px 10px;
+        }
+
+        .compartment-chevron {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .compartment.open .compartment-chevron {
+            transform: rotate(180deg);
+        }
+
+        .compartment-body {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.55s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .compartment.open .compartment-body {
+            grid-template-rows: 1fr;
+        }
+
+        .compartment-body-inner {
+            overflow: hidden;
         }
 
         .loop-container {
             overflow: hidden;
             width: 100%;
-            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-            -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-            padding: 20px 0;
+            mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+            padding: clamp(14px, 3vw, 24px) 0;
         }
 
         .loop-track {
             display: flex;
-            gap: 24px;
+            gap: clamp(14px, 2.5vw, 24px);
             width: max-content;
         }
 
-        .scrolling {
-            animation: scroll 40s linear infinite;
+        .loop-track.scrolling {
+            animation: scroll 60s linear infinite;
+        }
+
+        .loop-track.scrolling:hover {
+            animation-play-state: paused;
         }
 
         .static-track {
             justify-content: center;
+            flex-wrap: wrap;
             width: 100%;
         }
 
@@ -97,20 +174,20 @@
         }
 
         .ui-card {
-            width: 300px;
-            height: 200px;
+            width: clamp(150px, 42vw, 300px);
+            height: clamp(105px, 29vw, 200px);
             background: var(--glass);
             backdrop-filter: blur(10px);
             border: 1px solid var(--glass-border);
-            border-radius: 24px;
+            border-radius: clamp(12px, 2vw, 24px);
             overflow: hidden;
             cursor: pointer;
             transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
             flex-shrink: 0;
         }
 
-        .ui-card:hover {
-            transform: translateY(-10px) scale(1.02);
+        .ui-card:hover, .ui-card:active {
+            transform: translateY(-6px) scale(1.02);
             border-color: rgba(255,255,255,0.3);
             box-shadow: 0 20px 40px rgba(0,0,0,0.6);
         }
@@ -119,7 +196,7 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            opacity: 0.8;
+            opacity: 0.85;
             transition: 0.3s;
         }
 
@@ -133,15 +210,21 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 2rem;
+            gap: 1.75rem;
             clip-path: circle(0% at 100% 0%);
             transition: clip-path 0.6s cubic-bezier(0.19, 1, 0.22, 1);
             pointer-events: none;
+            padding: 2rem;
+            text-align: center;
         }
 
         #mobile-overlay.open {
             clip-path: circle(150% at 100% 0%);
             pointer-events: auto;
+        }
+
+        #mobile-overlay a {
+            font-size: clamp(1.5rem, 8vw, 2.25rem);
         }
 
         #cert-modal {
@@ -153,23 +236,43 @@
             backdrop-filter: blur(15px);
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 16px;
         }
         #cert-modal.open { display: flex; }
         #modal-img {
-            max-width: 90%;
-            max-height: 70vh;
+            max-width: 92vw;
+            max-height: 65vh;
+            width: auto;
+            height: auto;
             border-radius: 12px;
             box-shadow: 0 0 50px rgba(255,255,255,0.1);
+        }
+
+        #modal-actions {
+            margin-top: clamp(1.25rem, 4vw, 2rem);
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        #modal-actions button {
+            font-size: 0.7rem;
+            padding: 14px 22px;
+        }
+
+        @media (max-width: 480px) {
+            .compartment-header { border-radius: 16px; }
+            .ui-card { border-radius: 14px; }
         }
     </style>
 </head>
 <body>
 
-    <canvas id="fluid-canvas"></canvas>
+    <div id="floating-lines-bg"></div>
 
-    <nav class="fixed top-8 left-1/2 -translate-x-1/2 z-50 hidden md:block">
-        <div class="nav-pill flex gap-2">
+    <nav class="fixed top-6 md:top-8 left-1/2 -translate-x-1/2 z-50 hidden md:block">
+        <div class="nav-pill flex gap-1 lg:gap-2">
             <a href="home.html" class="nav-link">Home</a>
             <a href="about-me.html" class="nav-link">About</a>
             <a href="Skills.html" class="nav-link">Skills</a>
@@ -180,32 +283,33 @@
         </div>
     </nav>
 
-    <button onclick="toggleMenu()" class="fixed top-6 right-6 z-[100] p-4 rounded-2xl bg-white text-black md:hidden">
+    <button onclick="toggleMenu()" class="fixed top-5 right-5 z-[100] p-3.5 rounded-2xl bg-white text-black md:hidden">
         <i data-lucide="menu" id="menu-icon"></i>
     </button>
 
     <div id="mobile-overlay">
-        <a href="home.html" class="text-3xl font-extrabold opacity-50 hover:opacity-100 transition">Home</a>
-        <a href="about-me.html" class="text-3xl font-extrabold opacity-50 hover:opacity-100 transition">About me</a>
-        <a href="Skills.html" class="text-3xl font-extrabold opacity-50 hover:opacity-100 transition">Skills</a>
-        <a href="projects.html" class="text-3xl font-extrabold opacity-50 hover:opacity-100 transition">Projects</a>
-        <a href="internship.html" class="text-3xl font-extrabold opacity-50 hover:opacity-100 transition">Internship</a>
-        <a href="#" class="text-3xl font-extrabold text-white">Certificates</a>
-        <a href="contact.html" class="text-3xl font-extrabold opacity-50 hover:opacity-100 transition">Contact</a>
+        <a href="home.html" class="font-extrabold opacity-50 hover:opacity-100 transition">Home</a>
+        <a href="about-me.html" class="font-extrabold opacity-50 hover:opacity-100 transition">About me</a>
+        <a href="Skills.html" class="font-extrabold opacity-50 hover:opacity-100 transition">Skills</a>
+        <a href="projects.html" class="font-extrabold opacity-50 hover:opacity-100 transition">Projects</a>
+        <a href="internship.html" class="font-extrabold opacity-50 hover:opacity-100 transition">Internship</a>
+        <a href="#" class="font-extrabold text-white">Certificates</a>
+        <a href="contact.html" class="font-extrabold opacity-50 hover:opacity-100 transition">Contact</a>
     </div>
 
-    <main class="relative z-10 pt-32 pb-20 px-6 text-center" id="main-content">
-        <h1 class="text-5xl font-extrabold mb-20 tracking-tighter">CERTIFICATIONS</h1>
+    <main class="relative z-10 pt-24 md:pt-32 pb-16 md:pb-20 px-4 sm:px-6 text-center max-w-6xl mx-auto" id="main-content">
+        <h1 class="page-title font-extrabold mb-3 tracking-tighter">CERTIFICATIONS</h1>
+        <p class="text-xs sm:text-sm text-gray-500 mb-12 md:mb-16 tracking-wide">Tap a category to open it — tap any certificate to view it full size</p>
     </main>
 
     <div id="cert-modal" onclick="closeModal()">
         <div class="relative flex flex-col items-center" onclick="event.stopPropagation()">
             <img id="modal-img" src="" alt="Full view">
-            <div class="mt-8 flex gap-4">
-                <button id="download-pdf-btn" onclick="downloadAsPDF()" class="bg-white text-black px-8 py-4 rounded-xl font-bold uppercase text-xs tracking-widest hover:bg-gray-200 transition flex items-center gap-2">
+            <div id="modal-actions">
+                <button id="download-pdf-btn" onclick="downloadAsPDF()" class="bg-white text-black rounded-xl font-bold uppercase tracking-widest hover:bg-gray-200 transition flex items-center gap-2">
                     <i data-lucide="download" class="w-4 h-4"></i> Download PDF
                 </button>
-                <button onclick="closeModal()" class="bg-white/10 text-white px-8 py-4 rounded-xl font-bold uppercase text-xs border border-white/20">Close</button>
+                <button onclick="closeModal()" class="bg-white/10 text-white rounded-xl font-bold uppercase tracking-widest border border-white/20">Close</button>
             </div>
         </div>
     </div>
@@ -270,7 +374,7 @@
                 { src: 'NT-java boot camp.png' },
                 { src: 'NT-Real-Time Color Detection System Using OpenCV.png' },
                 { src: 'NT-Social media under attack.png' },
-                
+
             ],
             "HACKERRANK": [
                 { src: 'HackerRank-javascript_basic .png' },
@@ -313,19 +417,30 @@
 
         function initGallery() {
             const main = document.getElementById('main-content');
-            
+            let first = true;
+
             Object.keys(certData).forEach(catName => {
                 const items = certData[catName];
-                const section = document.createElement('section');
-                section.className = 'mb-24';
-                
-                const trackId = `track-${catName.replace(/\s+/g, '-').toLowerCase()}`;
+                const slug = catName.replace(/\s+/g, '-').toLowerCase();
+                const trackId = `track-${slug}`;
                 const isScrolling = items.length > 3;
 
+                const section = document.createElement('section');
+                section.className = 'compartment' + (first ? ' open' : '');
+                section.id = `compartment-${slug}`;
+
                 section.innerHTML = `
-                    <div class="category-header">${catName}</div>
-                    <div class="loop-container">
-                        <div class="loop-track ${isScrolling ? 'scrolling' : 'static-track'}" id="${trackId}"></div>
+                    <button class="compartment-header" onclick="toggleCompartment('${slug}')" type="button">
+                        <i data-lucide="chevron-down" class="compartment-chevron"></i>
+                        <span class="compartment-name">${catName}</span>
+                        <span class="compartment-count">${items.length}</span>
+                    </button>
+                    <div class="compartment-body">
+                        <div class="compartment-body-inner">
+                            <div class="loop-container">
+                                <div class="loop-track ${isScrolling ? 'can-scroll' : 'static-track'} ${(isScrolling && first) ? 'scrolling' : ''}" id="${trackId}"></div>
+                            </div>
+                        </div>
                     </div>
                 `;
                 main.appendChild(section);
@@ -336,11 +451,28 @@
                 displayItems.forEach(item => {
                     const card = document.createElement('div');
                     card.className = 'ui-card';
-                    card.innerHTML = `<img src="${item.src}" onerror="this.src='https://via.placeholder.com/300x200?text=${catName}'">`;
+                    card.innerHTML = `<img src="${item.src}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x200?text=${encodeURIComponent(catName)}'">`;
                     card.onclick = () => openModal(item.src);
                     track.appendChild(card);
                 });
+
+                first = false;
             });
+
+            lucide.createIcons();
+        }
+
+        function toggleCompartment(slug) {
+            const section = document.getElementById(`compartment-${slug}`);
+            if (!section) return;
+            const track = document.getElementById(`track-${slug}`);
+            const isOpening = !section.classList.contains('open');
+
+            section.classList.toggle('open', isOpening);
+
+            if (track && track.classList.contains('can-scroll')) {
+                track.classList.toggle('scrolling', isOpening);
+            }
         }
 
         function toggleMenu() {
@@ -369,7 +501,7 @@
             const btn = document.getElementById('download-pdf-btn');
             const originalHTML = btn.innerHTML;
             btn.innerText = "GENERATING...";
-            
+
             if (!imgElement.complete || imgElement.naturalWidth === 0) {
                 alert("Image not loaded yet.");
                 btn.innerHTML = originalHTML;
@@ -403,20 +535,412 @@
             }
         }
 
-        (function() {
-            const canvas = document.getElementById('fluid-canvas');
-            const resize = () => {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-            };
-            window.addEventListener('resize', resize);
-            resize();
-        })();
-
         window.onload = () => {
             initGallery();
             lucide.createIcons();
         };
+    </script>
+
+    <!-- ===== FloatingLines background (vanilla JS / Three.js port) ===== -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+        }
+    }
+    </script>
+    <script type="module">
+        import * as THREE from "three";
+
+        const vertexShader = `
+            precision highp float;
+            void main() {
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `;
+
+        const fragmentShader = `
+            precision highp float;
+
+            uniform float iTime;
+            uniform vec3  iResolution;
+            uniform float animationSpeed;
+
+            uniform bool enableTop;
+            uniform bool enableMiddle;
+            uniform bool enableBottom;
+
+            uniform int topLineCount;
+            uniform int middleLineCount;
+            uniform int bottomLineCount;
+
+            uniform float topLineDistance;
+            uniform float middleLineDistance;
+            uniform float bottomLineDistance;
+
+            uniform vec3 topWavePosition;
+            uniform vec3 middleWavePosition;
+            uniform vec3 bottomWavePosition;
+
+            uniform vec2 iMouse;
+            uniform bool interactive;
+            uniform float bendRadius;
+            uniform float bendStrength;
+            uniform float bendInfluence;
+
+            uniform bool parallax;
+            uniform float parallaxStrength;
+            uniform vec2 parallaxOffset;
+
+            uniform vec3 lineGradient[8];
+            uniform int lineGradientCount;
+
+            const vec3 BLACK = vec3(0.0);
+            const vec3 PINK  = vec3(233.0, 71.0, 245.0) / 255.0;
+            const vec3 BLUE  = vec3(47.0,  75.0, 162.0) / 255.0;
+
+            mat2 rotate(float r) {
+                return mat2(cos(r), sin(r), -sin(r), cos(r));
+            }
+
+            vec3 background_color(vec2 uv) {
+                vec3 col = vec3(0.0);
+                float y = sin(uv.x - 0.2) * 0.3 - 0.1;
+                float m = uv.y - y;
+                col += mix(BLUE, BLACK, smoothstep(0.0, 1.0, abs(m)));
+                col += mix(PINK, BLACK, smoothstep(0.0, 1.0, abs(m - 0.8)));
+                return col * 0.5;
+            }
+
+            vec3 getLineColor(float t, vec3 baseColor) {
+                if (lineGradientCount <= 0) {
+                    return baseColor;
+                }
+                vec3 gradientColor;
+                if (lineGradientCount == 1) {
+                    gradientColor = lineGradient[0];
+                } else {
+                    float clampedT = clamp(t, 0.0, 0.9999);
+                    float scaled = clampedT * float(lineGradientCount - 1);
+                    int idx = int(floor(scaled));
+                    float f = fract(scaled);
+                    int idx2 = min(idx + 1, lineGradientCount - 1);
+                    vec3 c1 = lineGradient[idx];
+                    vec3 c2 = lineGradient[idx2];
+                    gradientColor = mix(c1, c2, f);
+                }
+                return gradientColor * 0.5;
+            }
+
+            float wave(vec2 uv, float offset, vec2 screenUv, vec2 mouseUv, bool shouldBend) {
+                float time = iTime * animationSpeed;
+                float x_offset   = offset;
+                float x_movement = time * 0.1;
+                float amp        = sin(offset + time * 0.2) * 0.3;
+                float y          = sin(uv.x + x_offset + x_movement) * amp;
+
+                if (shouldBend) {
+                    vec2 d = screenUv - mouseUv;
+                    float influence = exp(-dot(d, d) * bendRadius);
+                    float bendOffset = (mouseUv.y - screenUv.y) * influence * bendStrength * bendInfluence;
+                    y += bendOffset;
+                }
+
+                float m = uv.y - y;
+                return 0.0175 / max(abs(m) + 0.01, 1e-3) + 0.01;
+            }
+
+            void mainImage(out vec4 fragColor, in vec2 fragCoord) {
+                vec2 baseUv = (2.0 * fragCoord - iResolution.xy) / iResolution.y;
+                baseUv.y *= -1.0;
+
+                if (parallax) {
+                    baseUv += parallaxOffset;
+                }
+
+                vec3 col = vec3(0.0);
+                vec3 b = lineGradientCount > 0 ? vec3(0.0) : background_color(baseUv);
+
+                vec2 mouseUv = vec2(0.0);
+                if (interactive) {
+                    mouseUv = (2.0 * iMouse - iResolution.xy) / iResolution.y;
+                    mouseUv.y *= -1.0;
+                }
+
+                if (enableBottom) {
+                    for (int i = 0; i < 32; ++i) {
+                        if (i >= bottomLineCount) break;
+                        float fi = float(i);
+                        float t = fi / max(float(bottomLineCount - 1), 1.0);
+                        vec3 lineCol = getLineColor(t, b);
+                        float angle = bottomWavePosition.z * log(length(baseUv) + 1.0);
+                        vec2 ruv = baseUv * rotate(angle);
+                        col += lineCol * wave(
+                            ruv + vec2(bottomLineDistance * fi + bottomWavePosition.x, bottomWavePosition.y),
+                            1.5 + 0.2 * fi, baseUv, mouseUv, interactive
+                        ) * 0.2;
+                    }
+                }
+
+                if (enableMiddle) {
+                    for (int i = 0; i < 32; ++i) {
+                        if (i >= middleLineCount) break;
+                        float fi = float(i);
+                        float t = fi / max(float(middleLineCount - 1), 1.0);
+                        vec3 lineCol = getLineColor(t, b);
+                        float angle = middleWavePosition.z * log(length(baseUv) + 1.0);
+                        vec2 ruv = baseUv * rotate(angle);
+                        col += lineCol * wave(
+                            ruv + vec2(middleLineDistance * fi + middleWavePosition.x, middleWavePosition.y),
+                            2.0 + 0.15 * fi, baseUv, mouseUv, interactive
+                        );
+                    }
+                }
+
+                if (enableTop) {
+                    for (int i = 0; i < 32; ++i) {
+                        if (i >= topLineCount) break;
+                        float fi = float(i);
+                        float t = fi / max(float(topLineCount - 1), 1.0);
+                        vec3 lineCol = getLineColor(t, b);
+                        float angle = topWavePosition.z * log(length(baseUv) + 1.0);
+                        vec2 ruv = baseUv * rotate(angle);
+                        ruv.x *= -1.0;
+                        col += lineCol * wave(
+                            ruv + vec2(topLineDistance * fi + topWavePosition.x, topWavePosition.y),
+                            1.0 + 0.2 * fi, baseUv, mouseUv, interactive
+                        ) * 0.1;
+                    }
+                }
+
+                fragColor = vec4(col, 1.0);
+            }
+
+            void main() {
+                vec4 color = vec4(0.0);
+                mainImage(color, gl_FragCoord.xy);
+                gl_FragColor = color;
+            }
+        `;
+
+        const MAX_GRADIENT_STOPS = 8;
+
+        function hexToVec3(hex) {
+            let value = hex.trim();
+            if (value.startsWith('#')) value = value.slice(1);
+            let r = 255, g = 255, b = 255;
+            if (value.length === 3) {
+                r = parseInt(value[0] + value[0], 16);
+                g = parseInt(value[1] + value[1], 16);
+                b = parseInt(value[2] + value[2], 16);
+            } else if (value.length === 6) {
+                r = parseInt(value.slice(0, 2), 16);
+                g = parseInt(value.slice(2, 4), 16);
+                b = parseInt(value.slice(4, 6), 16);
+            }
+            return new THREE.Vector3(r / 255, g / 255, b / 255);
+        }
+
+        function initFloatingLines(container, opts = {}) {
+            if (!container || !window.WebGLRenderingContext) return () => {};
+
+            const {
+                linesGradient,
+                enabledWaves = ['top', 'middle', 'bottom'],
+                lineCount = 6,
+                lineDistance = 5,
+                topWavePosition,
+                middleWavePosition,
+                bottomWavePosition = { x: 2.0, y: -0.7, rotate: -1 },
+                animationSpeed = 1,
+                interactive = true,
+                bendRadius = 5.0,
+                bendStrength = -0.5,
+                mouseDamping = 0.05,
+                parallax = true,
+                parallaxStrength = 0.2
+            } = opts;
+
+            const getLineCount = (waveType) => {
+                if (typeof lineCount === 'number') return lineCount;
+                if (!enabledWaves.includes(waveType)) return 0;
+                const idx = enabledWaves.indexOf(waveType);
+                return lineCount[idx] ?? 6;
+            };
+            const getLineDistance = (waveType) => {
+                if (typeof lineDistance === 'number') return lineDistance;
+                if (!enabledWaves.includes(waveType)) return 0.1;
+                const idx = enabledWaves.indexOf(waveType);
+                return lineDistance[idx] ?? 0.1;
+            };
+
+            const topLineCount = enabledWaves.includes('top') ? getLineCount('top') : 0;
+            const middleLineCount = enabledWaves.includes('middle') ? getLineCount('middle') : 0;
+            const bottomLineCount = enabledWaves.includes('bottom') ? getLineCount('bottom') : 0;
+
+            const topLineDistance = enabledWaves.includes('top') ? getLineDistance('top') * 0.01 : 0.01;
+            const middleLineDistance = enabledWaves.includes('middle') ? getLineDistance('middle') * 0.01 : 0.01;
+            const bottomLineDistance = enabledWaves.includes('bottom') ? getLineDistance('bottom') * 0.01 : 0.01;
+
+            let active = true;
+            let raf = 0;
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+            camera.position.z = 1;
+
+            let renderer;
+            try {
+                renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+            } catch (e) {
+                return () => {};
+            }
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+            renderer.domElement.style.width = '100%';
+            renderer.domElement.style.height = '100%';
+            container.appendChild(renderer.domElement);
+
+            const uniforms = {
+                iTime: { value: 0 },
+                iResolution: { value: new THREE.Vector3(1, 1, 1) },
+                animationSpeed: { value: animationSpeed },
+                enableTop: { value: enabledWaves.includes('top') },
+                enableMiddle: { value: enabledWaves.includes('middle') },
+                enableBottom: { value: enabledWaves.includes('bottom') },
+                topLineCount: { value: topLineCount },
+                middleLineCount: { value: middleLineCount },
+                bottomLineCount: { value: bottomLineCount },
+                topLineDistance: { value: topLineDistance },
+                middleLineDistance: { value: middleLineDistance },
+                bottomLineDistance: { value: bottomLineDistance },
+                topWavePosition: { value: new THREE.Vector3(topWavePosition?.x ?? 10.0, topWavePosition?.y ?? 0.5, topWavePosition?.rotate ?? -0.4) },
+                middleWavePosition: { value: new THREE.Vector3(middleWavePosition?.x ?? 5.0, middleWavePosition?.y ?? 0.0, middleWavePosition?.rotate ?? 0.2) },
+                bottomWavePosition: { value: new THREE.Vector3(bottomWavePosition?.x ?? 2.0, bottomWavePosition?.y ?? -0.7, bottomWavePosition?.rotate ?? 0.4) },
+                iMouse: { value: new THREE.Vector2(-1000, -1000) },
+                interactive: { value: interactive },
+                bendRadius: { value: bendRadius },
+                bendStrength: { value: bendStrength },
+                bendInfluence: { value: 0 },
+                parallax: { value: parallax },
+                parallaxStrength: { value: parallaxStrength },
+                parallaxOffset: { value: new THREE.Vector2(0, 0) },
+                lineGradient: { value: Array.from({ length: MAX_GRADIENT_STOPS }, () => new THREE.Vector3(1, 1, 1)) },
+                lineGradientCount: { value: 0 }
+            };
+
+            if (linesGradient && linesGradient.length > 0) {
+                const stops = linesGradient.slice(0, MAX_GRADIENT_STOPS);
+                uniforms.lineGradientCount.value = stops.length;
+                stops.forEach((hex, i) => {
+                    const c = hexToVec3(hex);
+                    uniforms.lineGradient.value[i].set(c.x, c.y, c.z);
+                });
+            }
+
+            const material = new THREE.ShaderMaterial({ uniforms, vertexShader, fragmentShader });
+            const geometry = new THREE.PlaneGeometry(2, 2);
+            const mesh = new THREE.Mesh(geometry, material);
+            scene.add(mesh);
+
+            const clock = new THREE.Clock();
+            const targetMouse = new THREE.Vector2(-1000, -1000);
+            const currentMouse = new THREE.Vector2(-1000, -1000);
+            let targetInfluence = 0, currentInfluence = 0;
+            const targetParallax = new THREE.Vector2(0, 0);
+            const currentParallax = new THREE.Vector2(0, 0);
+
+            const setSize = () => {
+                if (!active) return;
+                const width = container.clientWidth || 1;
+                const height = container.clientHeight || 1;
+                renderer.setSize(width, height, false);
+                uniforms.iResolution.value.set(renderer.domElement.width, renderer.domElement.height, 1);
+            };
+            setSize();
+
+            const ro = typeof ResizeObserver !== 'undefined'
+                ? new ResizeObserver(() => active && setSize())
+                : null;
+            if (ro) ro.observe(container);
+            window.addEventListener('resize', setSize);
+
+            function handlePointerMove(e) {
+                const rect = renderer.domElement.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const dpr = renderer.getPixelRatio();
+                targetMouse.set(x * dpr, (rect.height - y) * dpr);
+                targetInfluence = 1.0;
+                if (parallax) {
+                    const cx = rect.width / 2, cy = rect.height / 2;
+                    const ox = (x - cx) / rect.width;
+                    const oy = -(y - cy) / rect.height;
+                    targetParallax.set(ox * parallaxStrength, oy * parallaxStrength);
+                }
+            }
+            function handlePointerLeave() { targetInfluence = 0.0; }
+
+            if (interactive) {
+                renderer.domElement.addEventListener('pointermove', handlePointerMove);
+                renderer.domElement.addEventListener('pointerleave', handlePointerLeave);
+            }
+
+            function renderLoop() {
+                if (!active) return;
+                uniforms.iTime.value = clock.getElapsedTime();
+                if (interactive) {
+                    currentMouse.lerp(targetMouse, mouseDamping);
+                    uniforms.iMouse.value.copy(currentMouse);
+                    currentInfluence += (targetInfluence - currentInfluence) * mouseDamping;
+                    uniforms.bendInfluence.value = currentInfluence;
+                }
+                if (parallax) {
+                    currentParallax.lerp(targetParallax, mouseDamping);
+                    uniforms.parallaxOffset.value.copy(currentParallax);
+                }
+                renderer.render(scene, camera);
+                raf = requestAnimationFrame(renderLoop);
+            }
+            renderLoop();
+
+            return function destroy() {
+                active = false;
+                cancelAnimationFrame(raf);
+                if (ro) ro.disconnect();
+                window.removeEventListener('resize', setSize);
+                if (interactive) {
+                    renderer.domElement.removeEventListener('pointermove', handlePointerMove);
+                    renderer.domElement.removeEventListener('pointerleave', handlePointerLeave);
+                }
+                geometry.dispose();
+                material.dispose();
+                renderer.dispose();
+                renderer.forceContextLoss();
+                if (renderer.domElement.parentElement) {
+                    renderer.domElement.parentElement.removeChild(renderer.domElement);
+                }
+            };
+        }
+
+        const container = document.getElementById('floating-lines-bg');
+        const isSmallScreen = window.matchMedia('(max-width: 768px)').matches;
+        const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+
+        try {
+            initFloatingLines(container, {
+                enabledWaves: ["top", "middle", "bottom"],
+                lineCount: isSmallScreen ? 4 : 8,
+                lineDistance: isSmallScreen ? 6 : 8,
+                bendRadius: 8,
+                bendStrength: -2,
+                interactive: !isCoarsePointer,
+                parallax: !isCoarsePointer,
+                animationSpeed: 1,
+                linesGradient: ["#6c1572", "#251ff6", "#6a6a6a"]
+            });
+        } catch (e) {
+            // Silently skip the background effect if WebGL isn't available.
+        }
     </script>
 </body>
 </html>
