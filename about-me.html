@@ -9,18 +9,20 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
         :root {
             --glass: rgba(255, 255, 255, 0.03);
             --glass-border: rgba(255, 255, 255, 0.08);
+            --accent-glow: rgba(99, 102, 241, 0.15);
         }
 
         body {
-            background-color: #050505;
-            color: white;
+            background-color: #050508;
+            color: #f3f4f6;
             font-family: 'Plus Jakarta Sans', sans-serif;
             overflow-x: hidden;
+            scroll-behavior: smooth;
         }
 
         #bg-canvas {
@@ -29,28 +31,30 @@
             left: 0;
             z-index: -1;
             filter: blur(60px);
-            opacity: 0.3;
+            opacity: 0.35;
         }
 
-        /* --- MODERN UI CARDS --- */
+        /* --- PREMIUM DARK GLASS CARDS --- */
         .ui-card {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: rgba(18, 18, 26, 0.55);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
             border: 1px solid var(--glass-border);
-            border-radius: 32px;
-            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            border-radius: 28px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
             overflow: hidden;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
         }
 
         .ui-card:hover {
-            background: rgba(255, 255, 255, 0.07);
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-8px) scale(1.01);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            background: rgba(25, 25, 36, 0.75);
+            border-color: rgba(129, 140, 248, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -15px var(--accent-glow);
         }
 
+        /* Subtle shine effect on hover */
         .ui-card::after {
             content: "";
             position: absolute;
@@ -60,7 +64,7 @@
             height: 200%;
             background: linear-gradient(45deg, transparent, rgba(255,255,255,0.03), transparent);
             transform: rotate(45deg);
-            transition: 0.8s;
+            transition: 0.8s ease-in-out;
             pointer-events: none;
         }
 
@@ -69,7 +73,7 @@
             top: 100%;
         }
 
-        /* --- NAVIGATION --- */
+        /* --- NAVIGATION (Preserved as requested) --- */
         .nav-pill {
             background: rgba(10, 10, 10, 0.6);
             backdrop-filter: blur(15px);
@@ -78,7 +82,7 @@
             border-radius: 100px;
         }
 
-   .nav-link {
+        .nav-link {
             padding: 8px 18px;
             border-radius: 100px;
             font-size: 0.85rem;
@@ -91,7 +95,7 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
-        /* --- MOBILE MENU --- */
+        /* --- MOBILE MENU (Preserved) --- */
         .mobile-toggle {
             background: white !important;
             color: black !important;
@@ -109,31 +113,63 @@
             clip-path: circle(150% at 100% 0%);
         }
 
+        /* --- TYPOGRAPHY & LISTS --- */
         .bento-label {
-            font-size: 0.65rem;
+            font-size: 0.75rem;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 0.15em;
-            opacity: 0.5;
+            letter-spacing: 0.2em;
+            color: #818cf8;
             margin-bottom: 1rem;
-            display: block;
+            display: inline-block;
+        }
+
+        .plus-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
         }
 
         .plus-list li {
             position: relative;
-            padding-left: 1.5rem;
-            margin-bottom: 0.75rem;
+            padding-left: 1.75rem;
+            margin-bottom: 1rem;
             font-size: 0.95rem;
-            opacity: 0.8;
-            line-height: 1.6;
+            color: #a1a1aa; /* Slightly softer gray for better readability */
+            line-height: 1.7;
+            transition: color 0.3s ease;
+        }
+        
+        .plus-list li:hover {
+            color: #f3f4f6;
         }
 
         .plus-list li::before {
             content: "+";
             position: absolute;
             left: 0;
-            color: white;
+            top: -2px;
+            color: #818cf8;
             font-weight: 800;
+            font-size: 1.2rem;
+        }
+        
+        /* Fade-in animation for content */
+        .fade-in-up {
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
@@ -141,19 +177,20 @@
 
     <div id="bg-canvas"></div>
 
+    <!-- Navigation (Unchanged) -->
     <nav class="fixed top-8 left-1/2 -translate-x-1/2 z-50 hidden xl:block">
         <div class="nav-pill flex gap-1">
             <a href="home.html" class="nav-link">Home</a>
             <a href="#" class="nav-link active">About me</a>
             <a href="Skills.html" class="nav-link">Skills</a>
-            <a href="#projects" class="nav-link">Projects</a>
+            <a href="projects.html" class="nav-link">Projects</a>
             <a href="internship.html" class="nav-link">Internship</a>
             <a href="certificate.html" class="nav-link">Certificates</a>
             <a href="contact.html" class="nav-link">Contact</a>
         </div>
     </nav>
 
-    <button onclick="toggleMenu()" class="fixed top-6 right-6 z-[100] p-4 rounded-2xl mobile-toggle xl:hidden">
+    <button onclick="toggleMenu()" class="fixed top-6 right-6 z-[100] p-4 rounded-2xl mobile-toggle xl:hidden shadow-lg">
         <i data-lucide="menu" id="menu-icon"></i>
     </button>
 
@@ -161,32 +198,49 @@
         <a href="home.html" class="text-2xl font-extrabold text-neutral-500 hover:text-white transition-colors">Home</a>
         <a href="#" class="text-2xl font-extrabold text-white transition-colors">About me</a>
         <a href="Skills.html" class="text-2xl font-extrabold text-neutral-500 hover:text-white transition-colors">Skills</a>
-        <a href="#projects" class="text-2xl font-extrabold text-neutral-500 hover:text-white transition-colors">Projects</a>
+        <a href="projects.html" class="text-2xl font-extrabold text-neutral-500 hover:text-white transition-colors">Projects</a>
         <a href="internship.html" class="text-2xl font-extrabold text-neutral-500 hover:text-white transition-colors">Internship</a>
         <a href="certificate.html" class="text-2xl font-extrabold text-neutral-500 hover:text-white transition-colors">Certificates</a>
         <a href="contact.html" class="text-2xl font-extrabold text-neutral-500 hover:text-white transition-colors">Contact</a>
     </div>
 
-    <main class="container mx-auto px-6 pt-32 pb-12 lg:pt-44">
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 sm:px-6 pt-28 sm:pt-36 pb-16 max-w-7xl">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
+            <!-- Left Column -->
             <div class="lg:col-span-8 flex flex-col gap-6">
                 
-                <div class="ui-card py-8 w-full flex items-center justify-center">
-                    <span class="text-lg font-extrabold tracking-[0.20em] uppercase opacity-90">About Me</span>
+                <!-- Title Card -->
+                <div class="ui-card fade-in-up py-5 px-8 w-full flex items-center justify-between border-indigo-500/20">
+                    <div class="flex items-center gap-4">
+                        <span class="relative flex h-3 w-3">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-3 w-3 bg-indigo-500"></span>
+                        </span>
+                        <span class="text-sm font-extrabold tracking-[0.2em] uppercase text-gray-200">About Me</span>
+                    </div>
                 </div>
 
-                <div class="ui-card p-10 md:p-14 bg-white !text-black">
-                    <span class="bento-label !text-black/50">Bio / Introduction</span>
-                    <h2 class="text-3xl md:text-5xl font-extrabold leading-tight mb-6">Hi, I'm Surya V.</h2>
-                    <p class="text-lg md:text-xl font-medium opacity-80 leading-relaxed">
+                <!-- Main Bio Card -->
+                <div class="ui-card fade-in-up delay-100 p-8 sm:p-12">
+                    <span class="bento-label flex items-center gap-2">
+                        <i data-lucide="user" class="w-4 h-4"></i> Introduction
+                    </span>
+                    <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight mb-6 text-white tracking-tight">
+                        Hi, I'm <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">Surya V</span>.
+                    </h1>
+                    <p class="text-base sm:text-lg font-normal text-gray-400 leading-relaxed max-w-3xl">
                         I'm passionate about technology, creativity, and problem-solving. My journey started with a curiosity to understand how things work, which naturally grew into learning programming, building projects, and exploring real-world applications of tech.
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
-                    <div class="ui-card p-8">
-                        <span class="bento-label">What I Do</span>
+                <!-- Bento Grid (What I Do & Interests) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 fade-in-up delay-200">
+                    <div class="ui-card p-7 sm:p-9 flex flex-col justify-start">
+                        <span class="bento-label flex items-center gap-2">
+                            <i data-lucide="code" class="w-4 h-4"></i> What I Do
+                        </span>
                         <ul class="plus-list">
                             <li>Develop apps, games, and web projects that combine functionality with simplicity.</li>
                             <li>Work on AI, Machine Learning, and innovative problem-solving projects.</li>
@@ -194,8 +248,10 @@
                         </ul>
                     </div>
 
-                    <div class="ui-card p-8">
-                        <span class="bento-label">Interests</span>
+                    <div class="ui-card p-7 sm:p-9 flex flex-col justify-start">
+                        <span class="bento-label flex items-center gap-2">
+                            <i data-lucide="sparkles" class="w-4 h-4"></i> Interests
+                        </span>
                         <ul class="plus-list">
                             <li>Exploring new technologies and frameworks.</li>
                             <li>Creating user-friendly apps & websites.</li>
@@ -204,21 +260,50 @@
                         </ul>
                     </div>
                 </div>
+
             </div>
 
-            <div class="lg:col-span-4 flex flex-col gap-6">
+            <!-- Right Column -->
+            <div class="lg:col-span-4 flex flex-col gap-6 fade-in-up delay-300">
                 
-                <div class="ui-card photo-card h-[400px] lg:h-[500px]">
-                    <img src="surya-v-profile.jpeg" class="w-full h-full object-cover transition-transform duration-700 hover:scale-110" alt="Surya V">
+                <!-- Profile Image Card -->
+                <div class="ui-card h-[340px] sm:h-[450px] lg:h-[440px] p-2 group w-full max-w-md mx-auto lg:max-w-none">
+                    <div class="w-full h-full rounded-[20px] overflow-hidden relative bg-black/20">
+                        <img src="surya-v-profile.jpeg" class="w-full h-full object-cover object-center sm:object-top transition-transform duration-700 group-hover:scale-110" alt="Surya V" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop'; this.onerror=null;">
+                        <!-- Stylish overlay gradient -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#050508] via-transparent to-transparent opacity-90 pointer-events-none"></div>
+                    </div>
                 </div>
 
-                <a href="SURYA V Resume.pdf" class="ui-card p-10 flex flex-col items-center justify-center gap-4 group flex-1">
-                    <div class="bg-white/10 p-5 rounded-full group-hover:scale-110 group-hover:bg-white group-hover:text-black transition-all">
-                        <i data-lucide="file-text" class="w-8 h-8"></i>
+                <!-- UPDATED Interactive Resume Card with Two Buttons -->
+                <div class="ui-card p-6 flex flex-col gap-5 w-full max-w-md mx-auto lg:max-w-none">
+                    <!-- Card Header -->
+                    <div class="flex items-center gap-4 px-2">
+                        <div class="bg-indigo-500/10 border border-indigo-500/20 p-3.5 rounded-2xl text-indigo-400 shrink-0">
+                            <i data-lucide="file-text" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-extrabold tracking-tight text-white">Curriculum Vitae</h3>
+                            <p class="text-xs font-semibold text-gray-400 mt-0.5 uppercase tracking-wider">PDF Document</p>
+                        </div>
                     </div>
-                    <span class="text-2xl font-black tracking-tighter">VIEW RESUME</span>
-                    <p class="text-xs font-bold opacity-40 uppercase tracking-widest">📃</p>
-                </a>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-3 w-full mt-2">
+                        <!-- View Button -->
+                        <a href="resume.pdf" target="_blank" rel="noopener noreferrer" 
+                           class="flex-1 flex items-center justify-center gap-2 py-4 sm:py-3.5 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 hover:text-white font-semibold transition-all duration-300 group touch-manipulation">
+                            <i data-lucide="eye" class="w-4 h-4 group-hover:scale-110 transition-transform"></i> 
+                            View
+                        </a>
+                        <!-- Download Button -->
+                        <a href="resume.pdf" download="resume.pdf" type="application/pdf"
+                           class="flex-1 flex items-center justify-center gap-2 py-4 sm:py-3.5 px-4 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white font-semibold shadow-lg shadow-indigo-500/20 transition-all duration-300 group touch-manipulation">
+                            <i data-lucide="download" class="w-4 h-4 group-hover:-translate-y-0.5 transition-transform"></i> 
+                            Download
+                        </a>
+                    </div>
+                </div>
 
             </div>
 
@@ -226,8 +311,10 @@
     </main>
 
     <script>
+        // Initialize Lucide Icons
         lucide.createIcons();
 
+        // Navigation Toggle (Unchanged logic)
         function toggleMenu() {
             const overlay = document.getElementById('mobile-overlay');
             const icon = document.getElementById('menu-icon');
@@ -236,11 +323,13 @@
             lucide.createIcons();
         }
 
-        // --- BACKGROUND SHADER ---
+        // --- BACKGROUND SHADER (Preserved & Adjusted for better performance) ---
         const scene = new THREE.Scene();
         const camera = new THREE.Camera();
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setPixelRatio(window.devicePixelRatio);
+        
+        // Optimize pixel ratio for performance
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById('bg-canvas').appendChild(renderer.domElement);
 
@@ -256,7 +345,8 @@
                 uniform vec2 iResolution;
                 void main() {
                     vec2 uv = gl_FragCoord.xy / iResolution.xy;
-                    vec3 col = 0.5 + 0.5 * cos(iTime + uv.xyx + vec3(0,2,4));
+                    // Slightly tweaked colors to match the refined indigo/purple theme
+                    vec3 col = 0.5 + 0.5 * cos(iTime * 0.8 + uv.xyx + vec3(0, 2, 4));
                     gl_FragColor = vec4(col * 0.12, 1.0);
                 }
             `
@@ -271,6 +361,7 @@
         }
         animate();
 
+        // Handle resize events smoothly
         window.addEventListener('resize', () => {
             renderer.setSize(window.innerWidth, window.innerHeight);
             material.uniforms.iResolution.value.set(window.innerWidth, window.innerHeight);
